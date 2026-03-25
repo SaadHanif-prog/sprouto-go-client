@@ -1,7 +1,7 @@
-import { apiClient } from "@/api/apiClient";
+import { apiClient } from "@/src/api/apiClient";
 import type {SignupApiResponse, CreateSignup, LoginApiResponse, CreateLogin, VerifyMe} from "../types/auth.types";
 
-import ENDPOINTS from "@/api/endpoints";
+import ENDPOINTS from "@/src/api/endpoints";
 
 // Signup
 export const signup = async (signupPayload : CreateSignup): Promise<SignupApiResponse> => {
