@@ -6,8 +6,10 @@ import Logo from './Logo';
 import PrivacyPolicy from './PrivacyPolicy';
 import CookiesPolicy from './CookiesPolicy';
 import DataUsage from './DataUsage';
-import { Role, Plan, Client, Site, mockPlans, mockClients } from '../types';
+import { Role, Plan, mockPlans } from '../types';
+import type { CreateSignup } from '../types/auth.types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLogin, useSignup } from '../hooks new/auth.hook';
 
 export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
   const [viewMode, setViewMode] = useState<'landing' | 'auth' | 'privacy' | 'cookies' | 'data'>('landing');
@@ -19,11 +21,12 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [title, setTitle] = useState<'Mr' | 'Mrs' | 'Ms' | 'Miss' | 'Dr' | 'Other'>('Mr');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [plans] = useLocalStorage<Plan[]>('sprouto_plans_v2', mockPlans);
-  const [clients, setClients] = useLocalStorage<Client[]>('sprouto_clients', mockClients);
-  const [sites, setSites] = useLocalStorage<Site[]>('sprouto_sites', []);
+  const loginMutation = useLogin();
+  const signupMutation = useSignup();
   const [signupData, setSignupData] = useState({
     firstName: '',
     surname: '',
@@ -58,157 +61,76 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (isSignUp && signupStep < 3) {
       handleNextStep(e);
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     if (isSignUp) {
-      try {
-        const selectedPlan = plans.find(p => p.id === selectedPlanId);
-        const planName = selectedPlan ? selectedPlan.name : 'Unknown Plan';
-        const planPrice = selectedPlan ? (billingCycle === 'annual' ? selectedPlan.price * 0.9 : selectedPlan.price) : 0;
-        
-        // Create new client
-        const clientId = `c${Date.now()}`;
-        const newClient: Client = {
-          id: clientId,
-          name: `${signupData.firstName} ${signupData.surname}`,
-          email: email,
-          password: password,
-          plan: planName,
-          status: 'active',
-          joined: new Date().toISOString().split('T')[0],
-          companyDetails: {
-            name: signupData.companyName,
-            number: signupData.companyNumber,
-            addressLine1: signupData.addressLine1,
-            addressLine2: signupData.addressLine2,
-            county: signupData.county,
-            city: signupData.city,
-            postcode: signupData.postcode
-          }
-        };
-        
-        // Create new site
-        const newSiteId = `site-${Date.now()}`;
-        const newSite: Site = {
-          id: newSiteId,
+      const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+      const plan = selectedPlan?.name.toLowerCase() === 'pro' ? 'pro' : 'starter';
+
+      const signupPayload: CreateSignup = {
+        role: 'client',
+        title,
+        firstname: signupData.firstName,
+        surname: signupData.surname,
+        email,
+        password,
+        company: {
           name: signupData.companyName,
-          url: `${signupData.companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
-          plan: planName,
-          clientId: clientId,
-          liveUrl: '',
-          gaMeasurementId: ''
-        };
+          number: signupData.companyNumber,
+        },
+        address: {
+          line1: signupData.addressLine1,
+          county: signupData.county,
+          city: signupData.city,
+          postcode: signupData.postcode,
+        },
+        subscription: {
+          plan,
+          billingCycle: billingCycle === 'annual' ? 'annually' : 'monthly',
+        },
+      };
 
-        setClients([...clients, newClient]);
-        setSites([...sites, newSite]);
-        
-        // Set the newly created site as the selected site
-        window.localStorage.setItem('sprouto_selected_site', JSON.stringify(newSiteId));
-        window.localStorage.setItem('sprouto_client_email', JSON.stringify(email));
-        window.dispatchEvent(new Event('local-storage'));
+      signupMutation.mutate(signupPayload, {
+        onSuccess: (data) => {
+          setIsLoading(false);
+          localStorage.setItem('sprouto_client_email', JSON.stringify(data.data.email));
+          window.dispatchEvent(new Event('local-storage'));
+          onLogin(data.data.role as Role);
+        },
+        onError: (error: any) => {
+          setIsLoading(false);
+          const message = error?.response?.data?.message || error?.message || 'Signup failed, please try again.';
+          setError(message);
+        },
+      });
 
-        // Send email to hello@sprouto.com
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: 'hello@sprouto.com',
-            subject: `New Client Signup - ${signupData.companyName}`,
-            html: `
-              <h2>A new client has signed up!</h2>
-              <p><strong>Client Name:</strong> ${signupData.firstName} ${signupData.surname}</p>
-              <p><strong>Company:</strong> ${signupData.companyName}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Plan Selected:</strong> ${planName}</p>
-              <p><strong>Billing Cycle:</strong> ${billingCycle}</p>
-            `
-          })
-        });
-
-        // Send welcome email to the client
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: email,
-            subject: `Welcome to SproutoGO, ${signupData.firstName}!`,
-            html: `
-              <h2>Welcome to SproutoGO!</h2>
-              <p>Hi ${signupData.firstName},</p>
-              <p>Thank you for signing up for the <strong>${planName}</strong> plan.</p>
-              <p>We are excited to help you grow your business: ${signupData.companyName}.</p>
-              <p>Your account has been created successfully. You can log in using this email address.</p>
-              <br/>
-              <p>Best regards,</p>
-              <p>The Sprouto Team</p>
-            `
-          })
-        });
-
-        // Redirect to Stripe Checkout
-        const response = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            items: [{ name: `${planName} (${billingCycle})`, price: planPrice }],
-            successUrl: window.location.origin + '?success=true',
-            cancelUrl: window.location.origin,
-            customerEmail: email,
-            billingCycle: billingCycle
-          })
-        });
-        
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error('Failed to create checkout session');
-        }
-        return; // Don't call onLogin yet, they will be redirected back
-      } catch (error) {
-        console.error('Signup checkout error:', error);
-        setError('Failed to process signup. Please try again.');
-        setIsLoading(false);
-        return;
-      }
+      return;
     }
 
-    // Simulate auth check
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // Check credentials to determine role
-      if (email === 'superadmin@sprouto.com' && password === 'superadmin123') {
-        onLogin('superadmin');
-      } else if (email === 'admin@sprouto.com' && password === 'admin123') {
-        onLogin('admin');
-      } else if (email === 'client@sprouto.com' && password === 'client123') {
-        localStorage.setItem('sprouto_client_email', JSON.stringify('hello@sprouto.com')); // mock client email
-        window.dispatchEvent(new Event('local-storage'));
-        onLogin('client');
-      } else {
-        // Check if it's a registered client
-        const client = clients.find(c => c.email === email && c.password === password);
-        if (client) {
-          // Find the client's site and set it as selected
-          const clientSite = sites.find(s => s.clientId === client.id);
-          if (clientSite) {
-            localStorage.setItem('sprouto_selected_site', JSON.stringify(clientSite.id));
-            localStorage.setItem('sprouto_client_email', JSON.stringify(client.email));
-            window.dispatchEvent(new Event('local-storage'));
-          }
-          onLogin('client');
-        } else {
-          setError('Invalid email or password.');
+    loginMutation.mutate({ email, password }, {
+      onSuccess: (data) => {
+        setIsLoading(false);
+
+        const role = data.data.role as Role;
+        if (role === 'client') {
+          localStorage.setItem('sprouto_client_email', JSON.stringify(data.data.email));
+          window.dispatchEvent(new Event('local-storage'));
         }
-      }
-    }, 1000);
+
+        onLogin(role);
+      },
+      onError: (error: any) => {
+        setIsLoading(false);
+        const message = error?.response?.data?.message || error?.message || 'Invalid email or password.';
+        setError(message);
+      },
+    });
   };
 
   return (
@@ -496,8 +418,12 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1 col-span-1">
                         <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Title</label>
-                        <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all appearance-none" required defaultValue="">
-                          <option value="" disabled className="bg-[#141414]">Select</option>
+                        <select
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value as 'Mr' | 'Mrs' | 'Ms' | 'Miss' | 'Dr' | 'Other')}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all appearance-none"
+                          required
+                        >
                           <option value="Mr" className="bg-[#141414]">Mr</option>
                           <option value="Mrs" className="bg-[#141414]">Mrs</option>
                           <option value="Ms" className="bg-[#141414]">Ms</option>
