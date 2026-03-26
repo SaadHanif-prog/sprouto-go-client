@@ -93,8 +93,10 @@ export default function App() {
   const [isSiteSelectorOpen, setIsSiteSelectorOpen] = useState(false);
 
   // Filter sites
-  const currentClient = clients.find((c) => c.email === clientEmail);
-
+  const currentClient =
+    clients.find((c) => c.email === clientEmail) ||
+    clients.find((c) => c.email === user?.email) ||
+    clients.find((c) => allSites.some((s) => s.clientId === c.id));
   const visibleSites =
     userRole === "superadmin" || userRole === "admin"
       ? allSites
@@ -339,9 +341,14 @@ export default function App() {
                 {activeTab === "targets" && <Targets siteId={selectedSiteId} />}
                 {activeTab === "auditor" && <SEOAuditor site={selectedSite} />}
                 {activeTab === "plans" && <Plans siteId={selectedSiteId} />}
-                {activeTab === "profile" && (
-                  <Profile currentClient={currentClient} />
-                )}
+                {activeTab === "profile" &&
+                  (currentClient ? (
+                    <Profile currentClient={currentClient} />
+                  ) : (
+                    <div className="text-white text-center mt-10">
+                      Loading profile...
+                    </div>
+                  ))}
                 {activeTab === "superadmin" && userRole === "superadmin" && (
                   <SuperAdmin sites={allSites} setSites={setAllSites} />
                 )}
