@@ -65,3 +65,9 @@ export type VerifyMe = {
     role: "admin" | "client" | "superadmin";
   };
 };
+
+
+export type LogoutApiResponse = {
+  success: string;
+  message: string;
+};

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
@@ -10,14 +10,14 @@ import type {
   SignupApiResponse,
   LoginApiResponse,
   VerifyMe,
-} from "../types/auth.types";
+} from "@/src/types/auth.types";
 import type { AxiosError } from "axios";
 
 // API
-import { signup, login, verifyMe } from "../api/auth.api";
+import { signup, login, verifyMe, logout } from "@/src/api/auth.api";
 
 // Redux actions
-import { signup as signupAction, login as loginAction } from "../global-states/slices/authSlice";
+import { signup as signupAction, login as loginAction, logout as logoutAction } from "@/src/global-states/slices/authSlice";
 
 export const useSignup = () => {
   const dispatch = useDispatch();
@@ -53,7 +53,6 @@ export const useLogin = () => {
     mutationFn: (loginPayload: CreateLogin) => login(loginPayload),
 
     onSuccess: (data: LoginApiResponse) => {
-      console.log("data in login", data);
 
       dispatch(
         loginAction({
@@ -63,6 +62,7 @@ export const useLogin = () => {
             email: data.data.email,
             role: data.data.role,
           },
+         
         })
       );
 
@@ -71,6 +71,22 @@ export const useLogin = () => {
 
     onError: (error: AxiosError<ErrorResponse>) => {
       toast.error(error.response?.data?.message || error.message);
+    },
+  });
+};
+
+export const useLogout = () => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      dispatch(logoutAction());
+      queryClient.clear();
+    },
+    onError: () => {
+      toast.error("Logout failed. Please try again.");
     },
   });
 };

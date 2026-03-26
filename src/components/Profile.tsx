@@ -5,10 +5,10 @@ import { Client } from '../types';
 
 interface ProfileProps {
   currentClient?: Client;
-  onUpdateClient: (client: Client) => void;
+  // onUpdateClient: (client: Client) => void;
 }
 
-export default function Profile({ currentClient, onUpdateClient }: ProfileProps) {
+export default function Profile({ currentClient }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: currentClient?.name || '',
@@ -55,7 +55,7 @@ export default function Profile({ currentClient, onUpdateClient }: ProfileProps)
       }
     };
     
-    onUpdateClient(updatedClient);
+    // onUpdateClient(updatedClient);
     setIsEditing(false);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);

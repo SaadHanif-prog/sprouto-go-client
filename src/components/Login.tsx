@@ -11,7 +11,7 @@ import type { CreateSignup } from '../types/auth.types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useLogin, useSignup } from '../hooks new/auth.hook';
 
-export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
+export default function Login({ onLogin }: { onLogin: () => void }) {
   const [viewMode, setViewMode] = useState<'landing' | 'auth' | 'privacy' | 'cookies' | 'data'>('landing');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,7 +101,7 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
           setIsLoading(false);
           localStorage.setItem('sprouto_client_email', JSON.stringify(data.data.email));
           window.dispatchEvent(new Event('local-storage'));
-          onLogin(data.data.role as Role);
+          onLogin();
         },
         onError: (error: any) => {
           setIsLoading(false);
@@ -123,7 +123,7 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
           window.dispatchEvent(new Event('local-storage'));
         }
 
-        onLogin(role);
+        onLogin()
       },
       onError: (error: any) => {
         setIsLoading(false);

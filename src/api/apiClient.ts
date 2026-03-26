@@ -1,11 +1,12 @@
 import axios from "axios";
 
-
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_ENV === "development" ? "http://localhost:5000/api/v1" : "https://live/api/v1",
-  withCredentials: true,   
+  baseURL:
+    import.meta.env.VITE_ENV === "development"
+      ? "http://localhost:5000/api/v1"
+      : "https://live/api/v1",
+  withCredentials: true,
 });
-
 
 // Response interceptor
 apiClient.interceptors.response.use(
@@ -13,24 +14,26 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Don't intercept /auth/refresh itself
+    // Don't intercept refresh itself
     if (originalRequest.url?.includes("/auth/refresh-access-token")) {
       return Promise.reject(error);
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
       try {
         await apiClient.post("/auth/refresh-access-token");
         return apiClient(originalRequest);
       } catch (refreshError: any) {
-        // Refresh failed → logout
-        window.location.href = "/login";
+        // window.location.href = "/login";
+
+        // Just reject → let app handle it
         return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(error); 
+    return Promise.reject(error);
   }
 );
 
