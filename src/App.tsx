@@ -26,12 +26,12 @@ import AIChat from "./components/AIChat";
 import SuperAdmin from "./components/SuperAdmin";
 import SEOAuditor from "./components/SEOAuditor";
 import Profile from "./components/Profile";
-import Login from "./components/Login";
 
-import { Role, Site, Client, mockClients } from "./types";
+import { Site, Client, mockClients } from "./types";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
+import StripeProvider from "./components/StripeProvider";
 
 export type Tab =
   | "dashboard"

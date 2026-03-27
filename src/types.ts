@@ -70,8 +70,8 @@ export interface Client {
 }
 
 export const mockPlans: Plan[] = [
-  { id: 'p1', name: 'Starter', price: 159, currency: 'GBP', features: ['1 Site', 'Basic Support'], webhookUrl: '', secretKey: '' },
-  { id: 'p2', name: 'Pro', price: 249, currency: 'GBP', features: ['3 Sites', 'Priority Support'], webhookUrl: '', secretKey: '' }
+  { id: 'starter', name: 'Starter', price: 159, currency: 'GBP', features: ['1 Site', 'Basic Support']},
+  { id: 'pro', name: 'Pro', price: 249, currency: 'GBP', features: ['3 Sites', 'Priority Support']}
 ];
 
 export const mockAddons: Addon[] = [
