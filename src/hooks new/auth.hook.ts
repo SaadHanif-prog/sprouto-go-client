@@ -17,7 +17,11 @@ import type { AxiosError } from "axios";
 import { signup, login, verifyMe, logout } from "@/src/api/auth.api";
 
 // Redux actions
-import { signup as signupAction, login as loginAction, logout as logoutAction } from "@/src/global-states/slices/authSlice";
+import {
+  signup as signupAction,
+  login as loginAction,
+  logout as logoutAction,
+} from "@/src/global-states/slices/authSlice";
 
 export const useSignup = () => {
   const dispatch = useDispatch();
@@ -29,6 +33,7 @@ export const useSignup = () => {
       dispatch(
         signupAction({
           user: {
+            userId: data.data.id, // ✅ added
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,
@@ -53,16 +58,15 @@ export const useLogin = () => {
     mutationFn: (loginPayload: CreateLogin) => login(loginPayload),
 
     onSuccess: (data: LoginApiResponse) => {
-
       dispatch(
         loginAction({
           user: {
+            userId: data.data.id, // ✅ added
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,
             role: data.data.role,
           },
-         
         })
       );
 

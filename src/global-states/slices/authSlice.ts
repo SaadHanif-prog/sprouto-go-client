@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 type User = {
+  userId: string; // ✅ added userId
   firstname: string;
   surname: string;
   email: string;

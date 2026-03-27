@@ -26,6 +26,7 @@ import AIChat from "./components/AIChat";
 import SuperAdmin from "./components/SuperAdmin";
 import SEOAuditor from "./components/SEOAuditor";
 import Profile from "./components/Profile";
+import Sites from "./components/Sites";
 
 import { Site, Client, mockClients } from "./types";
 import { useLocalStorage } from "./hooks/useLocalStorage";
@@ -40,7 +41,8 @@ export type Tab =
   | "auditor"
   | "plans"
   | "superadmin"
-  | "profile";
+  | "profile"
+  | "sites";
 
 const mockSites: Site[] = [
   {
@@ -229,7 +231,7 @@ export default function App() {
 
                     <button
                       onClick={() => {
-                        setActiveTab("plans");
+                        setActiveTab("sites"); //
                         setIsSiteSelectorOpen(false);
                       }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-white/5"
@@ -341,6 +343,7 @@ export default function App() {
                 {activeTab === "targets" && <Targets siteId={selectedSiteId} />}
                 {activeTab === "auditor" && <SEOAuditor site={selectedSite} />}
                 {activeTab === "plans" && <Plans siteId={selectedSiteId} />}
+                {activeTab === "sites" && <Sites />}
                 {activeTab === "profile" &&
                   (currentClient ? (
                     <Profile currentClient={currentClient} />

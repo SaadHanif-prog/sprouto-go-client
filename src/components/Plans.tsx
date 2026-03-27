@@ -26,7 +26,7 @@ export default function Plans({ siteId }: { siteId: string }) {
   const addons: Addon[] = mockAddons;
 
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );
 
@@ -86,19 +86,19 @@ export default function Plans({ siteId }: { siteId: string }) {
           <button
             onClick={() =>
               setBillingCycle((prev) =>
-                prev === "monthly" ? "annual" : "monthly",
+                prev === "monthly" ? "annually" : "monthly",
               )
             }
             className="relative w-16 h-8 rounded-full bg-white/10 border border-white/20 transition-colors hover:border-emerald-500/50 focus:outline-none"
           >
             <motion.div
               className="absolute top-1 left-1 w-6 h-6 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-              animate={{ x: billingCycle === "annual" ? 32 : 0 }}
+              animate={{ x: billingCycle === "annually" ? 32 : 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           </button>
           <span
-            className={`text-sm font-medium flex items-center gap-2 ${billingCycle === "annual" ? "text-white" : "text-slate-400"}`}
+            className={`text-sm font-medium flex items-center gap-2 ${billingCycle === "annually" ? "text-white" : "text-slate-400"}`}
           >
             Annually{" "}
             <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
@@ -137,7 +137,7 @@ export default function Plans({ siteId }: { siteId: string }) {
                     <div className="flex items-baseline gap-1">
                       <span className="text-xl font-bold text-white">
                         £
-                        {billingCycle === "annual"
+                        {billingCycle === "annually"
                           ? Math.round(addon.price * 12 * 0.8)
                           : addon.price}
                       </span>
@@ -145,13 +145,13 @@ export default function Plans({ siteId }: { siteId: string }) {
                         +VAT
                       </span>
                       <span className="text-sm text-slate-400 font-normal">
-                        /{billingCycle === "annual" ? "yr" : "mo"}
+                        /{billingCycle === "annually" ? "yr" : "mo"}
                       </span>
                     </div>
                     <span className="text-xs text-slate-500 mt-0.5">
                       Total inc. 20% UK VAT: £
                       {Math.round(
-                        (billingCycle === "annual"
+                        (billingCycle === "annually"
                           ? addon.price * 12 * 0.8
                           : addon.price) * 1.2,
                       )}
@@ -194,7 +194,7 @@ export default function Plans({ siteId }: { siteId: string }) {
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-4xl font-bold text-white">
                     £
-                    {billingCycle === "annual"
+                    {billingCycle === "annually"
                       ? Math.round(pkg.price * 12 * 0.8)
                       : pkg.price}
                   </span>
@@ -202,13 +202,13 @@ export default function Plans({ siteId }: { siteId: string }) {
                     +VAT
                   </span>
                   <span className="text-lg text-slate-400 font-normal ml-1">
-                    /{billingCycle === "annual" ? "yr" : "mo"}
+                    /{billingCycle === "annually" ? "yr" : "mo"}
                   </span>
                 </div>
                 <div className="text-sm text-slate-500 mt-2">
                   Total inc. 20% UK VAT: £
                   {Math.round(
-                    (billingCycle === "annual"
+                    (billingCycle === "annually"
                       ? pkg.price * 12 * 0.8
                       : pkg.price) * 1.2,
                   )}

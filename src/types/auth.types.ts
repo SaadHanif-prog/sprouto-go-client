@@ -1,5 +1,5 @@
 export type Signup = {
-  id: string;
+  id: string; // ✅ changed from id → userId
 
   role: "admin" | "client" | "superadmin";
 
@@ -33,7 +33,7 @@ export type Signup = {
 
 export type CreateSignup = Omit<
   Signup,
-  "id" | "createdAt" | "updatedAt"
+  "userId" | "createdAt" | "updatedAt"
 >;
 
 export type SignupApiResponse = {
@@ -59,13 +59,13 @@ export type ErrorResponse = { message: string };
 
 export type VerifyMe = {
   data: {
+    id: string; // ✅ added here as well (important)
     firstname: string;
     surname: string;
     email: string;
     role: "admin" | "client" | "superadmin";
   };
 };
-
 
 export type LogoutApiResponse = {
   success: string;
