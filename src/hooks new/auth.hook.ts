@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
@@ -59,10 +59,14 @@ export const useLogin = () => {
     mutationFn: (loginPayload: CreateLogin) => login(loginPayload),
 
     onSuccess: (data: LoginApiResponse) => {
+          const queryClient = new QueryClient();
+
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+
       dispatch(
         loginAction({
           user: {
-            userId: data.data.id, // ✅ added
+            userId: data.data.id, 
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,

@@ -13,15 +13,19 @@ import {
   type CreateSitePayload,
   type GetSitesResponse,
 } from "@/src/api/sites.api";
+import { useSelector } from "react-redux";
 
 // GET SITES
 export const useGetSites = (): UseQueryResult<
   GetSitesResponse,
   AxiosError
 > => {
+  const user = useSelector((state: any) => state.auth.user);
+
   return useQuery({
-    queryKey: ["sites"],
+    queryKey: ["sites", user?.userId], 
     queryFn: getSites,
+    enabled: !!user, 
   });
 };
 

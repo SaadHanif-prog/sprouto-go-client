@@ -9,10 +9,13 @@ import { selectSelectedSiteId } from "@/src/global-states/slices/siteSlice";
 
 import { useGetRequests, useCreateRequest, useAssignRequest } from "@/src/hooks new/requests.hook";
 import { useGetAllUsers } from "@/src/hooks new/auth.hook";
+import { RootState } from '../global-states/store';
 
 export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: string, sitePlan?: string }) {
 
   const selectedSiteId = useSelector(selectSelectedSiteId);
+
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const { data, isLoading } = useGetRequests(
     role === "admin" ? undefined : selectedSiteId
@@ -39,6 +42,11 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
     attachments: r.attachments || [],
   }));
 
+  const filteredRequests =
+  role === "developer"
+    ? requests.filter((r: any) => r.assignedTo?._id === user?.userId)
+    : requests;
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [newRequest, setNewRequest] = useState({
     title: '',
@@ -48,7 +56,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
   // ACTIVE REQUEST CALCULATION
-  const activeRequests = requests.filter((r: any) =>
+  const activeRequests = filteredRequests.filter((r: any) =>
     r.siteId === selectedSiteId && r.status !== 'completed'
   );
 
@@ -206,12 +214,12 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
       )}
 
       <div className="space-y-4">
-        {requests.length === 0 ? (
+        {filteredRequests.length === 0 ? (
           <div className="text-center py-12 bg-[#0a0a0a]/50 rounded-3xl border border-white/5">
             <p className="text-slate-500">No requests found.</p>
           </div>
         ) : (
-          requests.map((request: any, index: number) => {
+          filteredRequests.map((request: any, index: number) => {
             const StatusIcon = statusConfig[request.status].icon;
 
             return (

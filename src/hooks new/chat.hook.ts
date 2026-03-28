@@ -20,65 +20,91 @@ export interface ChatMessage {
 
 /* ── Hook ──────────────────────────────────────────────────────────── */
 
-/**
- * useChat – real-time chat for a single request room.
- *
- * @param requestId  The request._id to listen on (pass null/undefined to skip)
- * @param token      JWT access token for socket auth
- */
-export function useChat(requestId: string | null | undefined, token: string | null | undefined) {
+export function useChat(
+  requestId: string | null | undefined,
+  token: string | null | undefined,
+) {
   const socketRef = useRef<Socket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /* ── Connect once, reuse across re-renders ─────────────────────── */
+  /* ── Create socket once per token ──────────────────────────────── */
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      console.log("❌ No token, socket not initialized");
+      return;
+    }
 
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || process.env.VITE_SOCKET_URL || "", {
+    console.log("✅ Initializing socket with token:", token);
+
+    const socket = io(import.meta.env.VITE_SOCKET_URL, {
       auth: { token },
-      transports: ["websocket"],
       reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
 
-    socket.on("connect", () => setConnected(true));
-    socket.on("disconnect", () => setConnected(false));
+    socket.on("connect", () => {
+      console.log("🟢 Socket connected:", socket.id);
+      setConnected(true);
+      setError(null);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("🔴 Socket disconnected:", reason);
+      setConnected(false);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.log("❌ CONNECT ERROR:", err.message);
+      setError(err.message);
+      setConnected(false);
+    });
 
     socket.on("chat:error", ({ message }: { message: string }) => {
+      console.log("❌ CHAT ERROR:", message);
       setError(message);
     });
 
     return () => {
+      console.log("🧹 Cleaning up socket");
       socket.disconnect();
       socketRef.current = null;
+      setConnected(false);
     };
   }, [token]);
 
-  /* ── Join / leave room whenever requestId changes ──────────────── */
+  /* ── Join / leave room when requestId changes ──────────────────── */
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket || !requestId) return;
+
+    console.log("📥 Joining room:", requestId);
 
     setMessages([]);
     setError(null);
 
     socket.emit("chat:join", { requestId });
 
-    socket.on("chat:history", ({ messages: history }: { messages: ChatMessage[] }) => {
+    const handleHistory = ({ messages: history }: { messages: ChatMessage[] }) => {
+      console.log("📜 History received:", history.length);
       setMessages(history);
-    });
+    };
 
-    socket.on("chat:message", (msg: ChatMessage) => {
+    const handleMessage = (msg: ChatMessage) => {
+      console.log("💬 New message:", msg);
       setMessages((prev) => [...prev, msg]);
-    });
+    };
+
+    socket.on("chat:history", handleHistory);
+    socket.on("chat:message", handleMessage);
 
     return () => {
+      console.log("🚪 Leaving room:", requestId);
       socket.emit("chat:leave", { requestId });
-      socket.off("chat:history");
-      socket.off("chat:message");
+      socket.off("chat:history", handleHistory);
+      socket.off("chat:message", handleMessage);
     };
   }, [requestId]);
 
@@ -86,9 +112,12 @@ export function useChat(requestId: string | null | undefined, token: string | nu
   const sendMessage = useCallback(
     (text: string) => {
       if (!socketRef.current || !requestId || !text.trim()) return;
+
+      console.log("📤 Sending message:", text);
+
       socketRef.current.emit("chat:send", { requestId, text });
     },
-    [requestId]
+    [requestId],
   );
 
   return { messages, sendMessage, connected, error };

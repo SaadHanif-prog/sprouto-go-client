@@ -90,27 +90,30 @@ export default function App() {
   }, [activeTab, userRole, setActiveTab]);
 
   const navItems =
-    userRole === "superadmin"
-      ? ([
-          { id: "superadmin", label: "Super Admin", icon: ShieldAlert },
-          { id: "dashboard", label: "Overview", icon: LayoutDashboard },
-          { id: "requests", label: "All Requests", icon: Settings },
-          { id: "targets", label: "Monthly Targets", icon: Target },
-          { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
-          { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-        ] as const)
-      : ([
-          { id: "dashboard", label: "Overview", icon: LayoutDashboard },
-          {
-            id: "requests",
-            label: userRole === "admin" ? "All Requests" : "Site Requests",
-            icon: Settings,
-          },
-          { id: "targets", label: "Monthly Targets", icon: Target },
-          { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
-          { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-        ] as const);
-
+  userRole === "superadmin"
+    ? ([
+        { id: "superadmin", label: "Super Admin", icon: ShieldAlert },
+        { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+        { id: "requests", label: "All Requests", icon: Settings },
+        { id: "targets", label: "Monthly Targets", icon: Target },
+        { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
+        { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+      ] as const)
+    : userRole === "developer"
+    ? ([
+        { id: "requests", label: "Assigned Requests", icon: Settings },
+      ] as const)
+    : ([
+        { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+        {
+          id: "requests",
+          label: userRole === "admin" ? "All Requests" : "Site Requests",
+          icon: Settings,
+        },
+        { id: "targets", label: "Monthly Targets", icon: Target },
+        { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
+        { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+      ] as const);
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-[#050505] flex overflow-hidden font-sans text-slate-300 selection:bg-emerald-500/30">
@@ -130,7 +133,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="p-4">
+         {userRole !== "developer" &&   <div className="p-4">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
               Your Sites ({visibleSites.length})
             </div>
@@ -204,8 +207,7 @@ export default function App() {
                 )}
               </AnimatePresence>
             </div>
-          </div>
-
+          </div>}
           {/* Menu */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {

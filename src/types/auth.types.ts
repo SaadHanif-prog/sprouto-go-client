@@ -63,7 +63,7 @@ export type VerifyMe = {
     firstname: string;
     surname: string;
     email: string;
-    role: "admin" | "client" | "superadmin" | "develoepr";
+    role: "admin" | "client" | "superadmin" | "developer";
   };
 };
 
