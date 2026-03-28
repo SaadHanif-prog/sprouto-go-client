@@ -37,6 +37,13 @@ const baseMarkers = [
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 export default function Dashboard({ site }: { site: Site }) {
+  if (!site) {
+  return (
+    <div className="text-white p-6">
+      Loading site data...
+    </div>
+  );
+}
   const hasUrl = !!site.liveUrl;
 
   // Generate a deterministic hash from the URL to seed the stats

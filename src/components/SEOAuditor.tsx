@@ -15,6 +15,13 @@ interface Message {
 }
 
 export default function SEOAuditor({ site }: { site: Site }) {
+   if (!site) {
+  return (
+    <div className="text-white p-6">
+      Loading site data...
+    </div>
+  );
+}
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', role: 'model', content: `Hi there! I am your SEO & GEO Auditor for ${site.name}. I've analysed your site's health and trending keywords. How can I help you improve your search rankings today?` }
   ]);

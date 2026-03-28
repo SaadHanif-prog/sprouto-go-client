@@ -48,6 +48,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             surname: data.data.surname,
             email: data.data.email,
             role: data.data.role,
+            userId: data.data.id
           },
         }),
       );

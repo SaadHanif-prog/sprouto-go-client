@@ -3,22 +3,23 @@ import { useGetSites, useCreateSite } from "@/src/hooks new/sites.hook";
 
 export default function Sites() {
   const [url, setUrl] = useState("");
+  const [name, setName] = useState("");
 
   const { data, isLoading } = useGetSites();
   const { mutate: addSite, isPending } = useCreateSite();
 
   const sites = data?.data || [];
 
-  console.log("SItesss", sites);
-
   const handleAdd = () => {
-    if (!url.trim()) return;
+    if (!url.trim() || !name.trim()) return;
 
     addSite({
-      url, // ✅ removed userId (handled by backend)
+      name,
+      url,
     });
 
     setUrl("");
+    setName("");
   };
 
   return (
@@ -28,11 +29,19 @@ export default function Sites() {
       {/* Add Site */}
       <div className="flex gap-2">
         <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Site Name"
+          className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+        />
+
+        <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com"
           className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
         />
+
         <button
           onClick={handleAdd}
           disabled={isPending}
@@ -54,7 +63,8 @@ export default function Sites() {
               key={site._id}
               className="p-4 bg-white/5 border border-white/10 rounded-xl text-white"
             >
-              {site.url}
+              <div className="font-semibold">{site.name}</div>
+              <div className="text-sm text-slate-400">{site.url}</div>
             </div>
           ))
         )}

@@ -14,8 +14,16 @@ import {
   Menu,
 } from "lucide-react";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/src/global-states/store";
+
+import {
+  setSites,
+  setSelectedSite,
+  selectSites,
+  selectSelectedSite,
+  selectSelectedSiteId,
+} from "@/src/global-states/slices/siteSlice";
 
 import Logo from "./components/Logo";
 import Dashboard from "./components/Dashboard";
@@ -28,11 +36,10 @@ import SEOAuditor from "./components/SEOAuditor";
 import Profile from "./components/Profile";
 import Sites from "./components/Sites";
 
-import { Site, Client, mockClients } from "./types";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
-import StripeProvider from "./components/StripeProvider";
+import { useGetSites } from "./hooks new/sites.hook";
 
 export type Tab =
   | "dashboard"
@@ -44,77 +51,39 @@ export type Tab =
   | "profile"
   | "sites";
 
-const mockSites: Site[] = [
-  {
-    id: "site-1",
-    name: "Sprouto Main",
-    url: "sprouto.com",
-    plan: "Pro",
-    liveUrl: "",
-    gaMeasurementId: "",
-    clientId: "c1",
-  },
-  {
-    id: "site-2",
-    name: "Sprouto Blog",
-    url: "blog.sprouto.com",
-    plan: "Starter",
-    liveUrl: "",
-    gaMeasurementId: "",
-    clientId: "c2",
-  },
-];
-
 export default function App() {
-  //  Redux Auth
+
   const { user } = useSelector((state: RootState) => state.auth);
   const userRole = user?.role;
 
+  const dispatch = useDispatch();
   const logoutMutation = useLogout();
+
+  const { data } = useGetSites();
+
+  const sites = useSelector(selectSites);
+  const selectedSite = useSelector(selectSelectedSite);
+
+
+  const selectedSiteId = useSelector(selectSelectedSiteId);
+
+  // sync API → Redux
+  useEffect(() => {
+  if (data?.data?.length) {
+    dispatch(setSites(data.data));
+  }
+}, [data?.data]); 
 
   const [activeTab, setActiveTab] = useLocalStorage<Tab>(
     "sprouto_tab",
     "dashboard",
-  );
-  const [allSites, setAllSites] = useLocalStorage<Site[]>(
-    "sprouto_sites",
-    mockSites,
-  );
-  const [clients, setClients] = useLocalStorage<Client[]>(
-    "sprouto_clients",
-    mockClients,
-  );
-  const [clientEmail] = useLocalStorage<string>("sprouto_client_email", "");
-  const [selectedSiteId, setSelectedSiteId] = useLocalStorage<string>(
-    "sprouto_selected_site",
-    mockSites[0].id,
   );
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSiteSelectorOpen, setIsSiteSelectorOpen] = useState(false);
 
-  // Filter sites
-  const currentClient =
-    clients.find((c) => c.email === clientEmail) ||
-    clients.find((c) => c.email === user?.email) ||
-    clients.find((c) => allSites.some((s) => s.clientId === c.id));
-  const visibleSites =
-    userRole === "superadmin" || userRole === "admin"
-      ? allSites
-      : currentClient
-        ? allSites.filter((s) => s.clientId === currentClient.id)
-        : allSites;
-
-  // Ensure valid site
-  useEffect(() => {
-    if (
-      visibleSites.length > 0 &&
-      !visibleSites.find((s) => s.id === selectedSiteId)
-    ) {
-      setSelectedSiteId(visibleSites[0].id);
-    }
-  }, [visibleSites, selectedSiteId, setSelectedSiteId]);
+  const visibleSites = sites;
 
   // Prevent non-superadmin access
   useEffect(() => {
@@ -122,9 +91,6 @@ export default function App() {
       setActiveTab("dashboard");
     }
   }, [activeTab, userRole, setActiveTab]);
-
-  const selectedSite =
-    visibleSites.find((s) => s.id === selectedSiteId) || visibleSites[0];
 
   const navItems =
     userRole === "superadmin"
@@ -201,11 +167,11 @@ export default function App() {
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute top-full left-0 w-full mt-2 bg-[#141414] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
                   >
-                    {visibleSites.map((site) => (
+                    {visibleSites.map((site: any) => (
                       <button
                         key={site.id}
                         onClick={() => {
-                          setSelectedSiteId(site.id);
+                          dispatch(setSelectedSite(site.id)); // ✅ GLOBAL UPDATE
                           setIsSiteSelectorOpen(false);
                         }}
                         className={`w-full flex flex-col items-start px-4 py-3 hover:bg-white/5 transition-colors ${
@@ -223,22 +189,8 @@ export default function App() {
                         >
                           {site.name}
                         </span>
-                        <span className="text-xs text-slate-500">
-                          {site.url}
-                        </span>
                       </button>
                     ))}
-
-                    <button
-                      onClick={() => {
-                        setActiveTab("sites"); //
-                        setIsSiteSelectorOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-white/5"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add New Site
-                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -281,14 +233,8 @@ export default function App() {
         </motion.aside>
 
         {/* Main */}
-        <main
-          className={`flex-1 flex flex-col h-screen overflow-hidden relative bg-[#050505] transition-all duration-300 ${
-            isSidebarOpen ? "lg:ml-0" : "lg:ml-[-280px]"
-          }`}
-        >
-          {" "}
+        <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#050505]">
           <header className="h-20 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 lg:px-10 z-10">
-            {/* Left */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -298,66 +244,50 @@ export default function App() {
               </button>
 
               <h1 className="text-2xl font-semibold text-white tracking-tight">
-                {currentClient?.companyDetails?.name ||
-                  currentClient?.name ||
-                  selectedSite?.name ||
-                  "SproutoGO"}
+                {user?.firstname || user?.email || "SproutoGO"}
               </h1>
             </div>
 
-            {/* Right */}
             <div className="flex items-center gap-6">
-              {/* System Status */}
               <div className="hidden md:flex items-center gap-3 text-sm bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-slate-300 font-medium">
                   System Online
                 </span>
               </div>
 
-              {/* User Avatar */}
               <div
                 onClick={() => setActiveTab("profile")}
-                className="w-10 h-10 rounded-full bg-slate-800 border border-white/20 shadow-lg overflow-hidden cursor-pointer hover:border-emerald-500/50 transition-colors"
+                className="w-10 h-10 rounded-full bg-slate-800 border border-white/20 overflow-hidden cursor-pointer"
               >
                 <img src="https://picsum.photos/seed/user/100/100" alt="User" />
               </div>
             </div>
           </header>
+
           <div className="flex-1 overflow-y-auto p-6">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={`${activeTab}-${selectedSiteId}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <motion.div key={`${activeTab}-${selectedSiteId}`}>
                 {activeTab === "dashboard" && <Dashboard site={selectedSite} />}
                 {activeTab === "requests" && (
                   <SiteRequests
                     siteId={selectedSiteId}
                     role={userRole}
-                    sitePlan={selectedSite.plan}
+                    sitePlan={selectedSite?.plan}
                   />
                 )}
                 {activeTab === "targets" && <Targets siteId={selectedSiteId} />}
                 {activeTab === "auditor" && <SEOAuditor site={selectedSite} />}
                 {activeTab === "plans" && <Plans siteId={selectedSiteId} />}
                 {activeTab === "sites" && <Sites />}
-                {activeTab === "profile" &&
-                  (currentClient ? (
-                    <Profile currentClient={currentClient} />
-                  ) : (
-                    <div className="text-white text-center mt-10">
-                      Loading profile...
-                    </div>
-                  ))}
+                {activeTab === "profile" && <Profile currentClient={user} />}
                 {activeTab === "superadmin" && userRole === "superadmin" && (
-                  <SuperAdmin sites={allSites} setSites={setAllSites} />
+                  <SuperAdmin sites={sites} />
                 )}
               </motion.div>
             </AnimatePresence>
           </div>
+
           {!isChatOpen && (
             <button
               onClick={() => setIsChatOpen(true)}
@@ -366,6 +296,7 @@ export default function App() {
               <MessageSquare className="w-6 h-6 text-white" />
             </button>
           )}
+
           <AnimatePresence>
             {isChatOpen && <AIChat onClose={() => setIsChatOpen(false)} />}
           </AnimatePresence>

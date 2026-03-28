@@ -2,15 +2,20 @@ import { apiClient } from "@/src/api/apiClient";
 import ENDPOINTS from "@/src/api/endpoints";
 
 // Types
-export interface Site {
-  _id: string;
-  userId: string;
+type Site = {
+  id: string; 
+  name: string;
   url: string;
-  createdAt: string;
-}
+  userId: string;
+  plan: "starter" | "pro";
+  entitlementId: string;
+  liveUrl?: string;
+  gaMeasurementId?: string;
+};
 
 export interface CreateSitePayload {
-  url: string; // ✅ removed userId
+  url: string;
+  name: string;
 }
 
 export interface GetSitesResponse {

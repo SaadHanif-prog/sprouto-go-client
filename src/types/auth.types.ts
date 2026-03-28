@@ -1,7 +1,7 @@
 export type Signup = {
   id: string; // ✅ changed from id → userId
 
-  role: "admin" | "client" | "superadmin";
+  role: "admin" | "client" | "superadmin" | "developer";
 
   title: "Mr" | "Mrs" | "Ms" | "Miss" | "Dr" | "Other";
   firstname: string;
@@ -63,7 +63,7 @@ export type VerifyMe = {
     firstname: string;
     surname: string;
     email: string;
-    role: "admin" | "client" | "superadmin";
+    role: "admin" | "client" | "superadmin" | "develoepr";
   };
 };
 
