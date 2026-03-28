@@ -10,11 +10,12 @@ import type {
   SignupApiResponse,
   LoginApiResponse,
   VerifyMe,
+  GetAllUsersApiResponse,
 } from "@/src/types/auth.types";
 import type { AxiosError } from "axios";
 
 // API
-import { signup, login, verifyMe, logout } from "@/src/api/auth.api";
+import { signup, login, verifyMe, logout, getAllUsers } from "@/src/api/auth.api";
 
 // Redux actions
 import {
@@ -33,7 +34,7 @@ export const useSignup = () => {
       dispatch(
         signupAction({
           user: {
-            userId: data.data.id, // ✅ added
+            userId: data.data.id, 
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,
@@ -102,5 +103,16 @@ export const useVerifyMe = (): UseQueryResult<
   return useQuery({
     queryKey: ["verifyMe"],
     queryFn: verifyMe,
+  });
+};
+
+
+export const useGetAllUsers = (): UseQueryResult<
+  GetAllUsersApiResponse,
+  AxiosError<ErrorResponse>
+> => {
+  return useQuery({
+    queryKey: ["users"], 
+    queryFn: getAllUsers,
   });
 };

@@ -1,5 +1,5 @@
 import { apiClient } from "@/src/api/apiClient";
-import type {SignupApiResponse, CreateSignup, LoginApiResponse, CreateLogin, VerifyMe, LogoutApiResponse} from "../types/auth.types";
+import type {SignupApiResponse, CreateSignup, LoginApiResponse, CreateLogin, VerifyMe, LogoutApiResponse, GetAllUsersApiResponse} from "../types/auth.types";
 
 import ENDPOINTS from "@/src/api/endpoints";
 
@@ -27,3 +27,10 @@ export const verifyMe = async (): Promise<VerifyMe> => {
   return data;
 };
 
+// Get All Users
+export const getAllUsers = async (): Promise<GetAllUsersApiResponse> => {
+  const { data } = await apiClient.get<GetAllUsersApiResponse>(
+    `${ENDPOINTS.auth}/users`
+  );
+  return data;
+};

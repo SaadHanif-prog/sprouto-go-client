@@ -1,5 +1,5 @@
 export type Signup = {
-  id: string; // ✅ changed from id → userId
+  id: string; 
 
   role: "admin" | "client" | "superadmin" | "developer";
 
@@ -59,7 +59,7 @@ export type ErrorResponse = { message: string };
 
 export type VerifyMe = {
   data: {
-    id: string; // ✅ added here as well (important)
+    id: string; 
     firstname: string;
     surname: string;
     email: string;
@@ -70,4 +70,18 @@ export type VerifyMe = {
 export type LogoutApiResponse = {
   success: string;
   message: string;
+};
+
+export type User = {
+  id: string;
+  firstname: string;
+  surname: string;
+  email: string;
+  role: "admin" | "client" | "superadmin" | "developer";
+};
+
+export type GetAllUsersApiResponse = {
+  success: boolean;
+  count: number;
+  data: User[];
 };

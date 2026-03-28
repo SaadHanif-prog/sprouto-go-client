@@ -5,7 +5,7 @@ type User = {
   firstname: string;
   surname: string;
   email: string;
-  role: "admin" | "client" | "superadmin";
+  role: "admin" | "client" | "superadmin" | "developer";
 };
 
 type AuthState = {

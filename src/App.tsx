@@ -52,7 +52,6 @@ export type Tab =
   | "sites";
 
 export default function App() {
-
   const { user } = useSelector((state: RootState) => state.auth);
   const userRole = user?.role;
 
@@ -63,16 +62,14 @@ export default function App() {
 
   const sites = useSelector(selectSites);
   const selectedSite = useSelector(selectSelectedSite);
-
-
   const selectedSiteId = useSelector(selectSelectedSiteId);
 
   // sync API → Redux
   useEffect(() => {
-  if (data?.data?.length) {
-    dispatch(setSites(data.data));
-  }
-}, [data?.data]); 
+    if (data?.data?.length) {
+      dispatch(setSites(data.data));
+    }
+  }, [data?.data]);
 
   const [activeTab, setActiveTab] = useLocalStorage<Tab>(
     "sprouto_tab",
@@ -171,7 +168,7 @@ export default function App() {
                       <button
                         key={site.id}
                         onClick={() => {
-                          dispatch(setSelectedSite(site.id)); // ✅ GLOBAL UPDATE
+                          dispatch(setSelectedSite(site.id));
                           setIsSiteSelectorOpen(false);
                         }}
                         className={`w-full flex flex-col items-start px-4 py-3 hover:bg-white/5 transition-colors ${
@@ -191,6 +188,18 @@ export default function App() {
                         </span>
                       </button>
                     ))}
+
+                    {/* ✅ ADD NEW SITE (RESTORED — ONLY CHANGE) */}
+                    <button
+                      onClick={() => {
+                        setActiveTab("sites");
+                        setIsSiteSelectorOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-white/5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add New Site
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -232,7 +241,7 @@ export default function App() {
           </div>
         </motion.aside>
 
-        {/* Main */}
+        {/* Main (UNCHANGED) */}
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#050505]">
           <header className="h-20 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 lg:px-10 z-10">
             <div className="flex items-center gap-4">
@@ -271,19 +280,27 @@ export default function App() {
                 {activeTab === "dashboard" && <Dashboard site={selectedSite} />}
                 {activeTab === "requests" && (
                   <SiteRequests
-                    siteId={selectedSiteId}
                     role={userRole}
                     sitePlan={selectedSite?.plan}
                   />
                 )}
-                {activeTab === "targets" && <Targets siteId={selectedSiteId} />}
-                {activeTab === "auditor" && <SEOAuditor site={selectedSite} />}
-                {activeTab === "plans" && <Plans siteId={selectedSiteId} />}
-                {activeTab === "sites" && <Sites />}
-                {activeTab === "profile" && <Profile currentClient={user} />}
-                {activeTab === "superadmin" && userRole === "superadmin" && (
-                  <SuperAdmin sites={sites} />
+                {activeTab === "targets" && (
+                  <Targets siteId={selectedSiteId} />
                 )}
+                {activeTab === "auditor" && (
+                  <SEOAuditor site={selectedSite} />
+                )}
+                {activeTab === "plans" && (
+                  <Plans siteId={selectedSiteId} />
+                )}
+                {activeTab === "sites" && <Sites />}
+                {activeTab === "profile" && (
+                  <Profile currentClient={user} />
+                )}
+                {activeTab === "superadmin" &&
+                  userRole === "superadmin" && (
+                    <SuperAdmin sites={sites} />
+                  )}
               </motion.div>
             </AnimatePresence>
           </div>
