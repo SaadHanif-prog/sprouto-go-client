@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Save, Building2, User, Mail, MapPin, CreditCard, Shield, CheckCircle2 } from 'lucide-react';
-import { Client } from '../types';
 import { User as UserT } from '../global-states/slices/authSlice';
 
 interface ProfileProps {
