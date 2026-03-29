@@ -1,7 +1,11 @@
-export type Signup = {
-  id: string; 
+export type Role = "admin" | "client" | "superadmin" | "developer";
 
-  role: "admin" | "client" | "superadmin" | "developer";
+// ---------------- SIGNUP ----------------
+
+export type Signup = {
+  id: string;
+
+  role: Role;
 
   title: "Mr" | "Mrs" | "Ms" | "Miss" | "Dr" | "Other";
   firstname: string;
@@ -22,6 +26,7 @@ export type Signup = {
     postcode: string;
   };
 
+  // ✅ Only used during signup
   subscription: {
     plan: "starter" | "pro";
     billingCycle: "monthly" | "annually";
@@ -31,9 +36,10 @@ export type Signup = {
   updatedAt: string;
 };
 
+// ❗ FIXED: remove wrong "userId"
 export type CreateSignup = Omit<
   Signup,
-  "userId" | "createdAt" | "updatedAt"
+  "id" | "createdAt" | "updatedAt"
 >;
 
 export type SignupApiResponse = {
@@ -42,6 +48,8 @@ export type SignupApiResponse = {
   data: Omit<Signup, "password">;
 };
 
+// ---------------- LOGIN ----------------
+
 export type Login = {
   email: string;
   password: string;
@@ -49,39 +57,79 @@ export type Login = {
 
 export type CreateLogin = Login;
 
+// ⚠️ Login response DOES NOT include subscription in your backend
 export type LoginApiResponse = {
   success: boolean;
   message: string;
-  data: Omit<Signup, "password">;
-};
-
-export type ErrorResponse = { message: string };
-
-export type VerifyMe = {
   data: {
-    id: string; 
+    id: string;
+
     firstname: string;
     surname: string;
     email: string;
-    role: "admin" | "client" | "superadmin" | "developer";
+    role: Role;
+
+    company: {
+      name: string;
+      number: string;
+    };
+
+    address: {
+      line1: string;
+      city: string;
+      county: string;
+      postcode: string;
+    };
   };
 };
 
-export type LogoutApiResponse = {
-  success: string;
-  message: string;
+// ---------------- VERIFY ME ----------------
+
+export type VerifyMe = {
+  success: boolean;
+  data: {
+    id: string;
+
+    firstname: string;
+    surname: string;
+    email: string;
+    role: Role;
+
+    company: {
+      name: string;
+      number: string;
+    };
+
+    address: {
+      line1: string;
+      city: string;
+      county: string;
+      postcode: string;
+    };
+  };
 };
+
+// ---------------- USER LIST ----------------
 
 export type User = {
   id: string;
   firstname: string;
   surname: string;
   email: string;
-  role: "admin" | "client" | "superadmin" | "developer";
+  role: Role;
 };
 
 export type GetAllUsersApiResponse = {
   success: boolean;
   count: number;
   data: User[];
+};
+
+// ---------------- COMMON ----------------
+
+export type ErrorResponse = { message: string };
+
+export type LogoutApiResponse = {
+  success: boolean;
+  message: string;
 };

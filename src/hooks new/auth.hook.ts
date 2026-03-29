@@ -1,4 +1,10 @@
-import { QueryClient, useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 
@@ -15,7 +21,13 @@ import type {
 import type { AxiosError } from "axios";
 
 // API
-import { signup, login, verifyMe, logout, getAllUsers } from "@/src/api/auth.api";
+import {
+  signup,
+  login,
+  verifyMe,
+  logout,
+  getAllUsers,
+} from "@/src/api/auth.api";
 
 // Redux actions
 import {
@@ -32,15 +44,25 @@ export const useSignup = () => {
 
     onSuccess: (data: SignupApiResponse) => {
       dispatch(
-        signupAction({
+        loginAction({
           user: {
-            userId: data.data.id, 
+            userId: data.data.id,
+
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,
             role: data.data.role,
+
+            companyName: data.data.company?.name || "",
+            companyNumber: data.data.company?.number || "",
+
+            addressLine1: data.data.address?.line1 || "",
+
+            city: data.data.address?.city || "",
+            county: data.data.address?.county || "",
+            postcode: data.data.address?.postcode || "",
           },
-        })
+        }),
       );
 
       toast.success(data.message || "Signup Successful.");
@@ -59,20 +81,30 @@ export const useLogin = () => {
     mutationFn: (loginPayload: CreateLogin) => login(loginPayload),
 
     onSuccess: (data: LoginApiResponse) => {
-          const queryClient = new QueryClient();
+      const queryClient = new QueryClient();
 
       queryClient.invalidateQueries({ queryKey: ["sites"] });
 
       dispatch(
         loginAction({
           user: {
-            userId: data.data.id, 
+            userId: data.data.id,
+
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,
             role: data.data.role,
+
+            companyName: data.data.company?.name || "",
+            companyNumber: data.data.company?.number || "",
+
+            addressLine1: data.data.address?.line1 || "",
+
+            city: data.data.address?.city || "",
+            county: data.data.address?.county || "",
+            postcode: data.data.address?.postcode || "",
           },
-        })
+        }),
       );
 
       toast.success(data.message || "Login Successful.");
@@ -110,13 +142,12 @@ export const useVerifyMe = (): UseQueryResult<
   });
 };
 
-
 export const useGetAllUsers = (): UseQueryResult<
   GetAllUsersApiResponse,
   AxiosError<ErrorResponse>
 > => {
   return useQuery({
-    queryKey: ["users"], 
+    queryKey: ["users"],
     queryFn: getAllUsers,
   });
 };

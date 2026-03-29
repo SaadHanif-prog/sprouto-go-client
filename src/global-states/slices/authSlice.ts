@@ -1,11 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-type User = {
-  userId: string; 
+export type User = {
+  userId: string;
+
   firstname: string;
   surname: string;
+  
   email: string;
+
   role: "admin" | "client" | "superadmin" | "developer";
+
+  companyName: string;
+  companyNumber: string;
+
+  addressLine1: string;
+
+  city: string;
+  county: string;
+  postcode: string;
 };
 
 type AuthState = {
@@ -22,18 +34,12 @@ const authSlice = createSlice({
   name: "AUTH",
   initialState: initialAuthData,
   reducers: {
-    login: (
-      state,
-      action: PayloadAction<{ user: User }>
-    ) => {
+    login: (state, action: PayloadAction<{ user: User }>) => {
       state.user = action.payload.user;
       state.isLoggedIn = true;
     },
 
-    signup: (
-      state,
-      action: PayloadAction<{ user: User }>
-    ) => {
+    signup: (state, action: PayloadAction<{ user: User }>) => {
       state.user = action.payload.user;
       state.isLoggedIn = true;
     },
@@ -43,15 +49,23 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
     },
 
-    setUser: (
-      state,
-      action: PayloadAction<{ user: User }>
-    ) => {
+    setUser: (state, action: PayloadAction<{ user: User }>) => {
       state.user = action.payload.user;
       state.isLoggedIn = true;
+    },
+
+    updateProfile: (
+      state,
+      action: PayloadAction<Partial<User>>
+    ) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     },
   },
 });
 
-export const { signup, login, logout, setUser } = authSlice.actions;
+export const { signup, login, logout, setUser, updateProfile } =
+  authSlice.actions;
+
 export default authSlice.reducer;

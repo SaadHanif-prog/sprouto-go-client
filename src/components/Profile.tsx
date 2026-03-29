@@ -2,25 +2,32 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Save, Building2, User, Mail, MapPin, CreditCard, Shield, CheckCircle2 } from 'lucide-react';
 import { Client } from '../types';
+import { User as UserT } from '../global-states/slices/authSlice';
 
 interface ProfileProps {
-  currentClient?: Client;
+  currentClient?: UserT;
   // onUpdateClient: (client: Client) => void;
 }
 
 export default function Profile({ currentClient }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: currentClient?.name || '',
-    email: currentClient?.email || '',
-    companyName: currentClient?.companyDetails?.name || '',
-    companyNumber: currentClient?.companyDetails?.number || '',
-    addressLine1: currentClient?.companyDetails?.addressLine1 || '',
-    addressLine2: currentClient?.companyDetails?.addressLine2 || '',
-    city: currentClient?.companyDetails?.city || '',
-    county: currentClient?.companyDetails?.county || '',
-    postcode: currentClient?.companyDetails?.postcode || '',
-  });
+ const [formData, setFormData] = useState({
+  name: currentClient
+    ? `${currentClient.firstname} ${currentClient.surname}`
+    : '',
+
+  email: currentClient?.email || '',
+
+  companyName: currentClient?.companyName || '',
+  companyNumber: currentClient?.companyNumber || '',
+
+  addressLine1: currentClient?.addressLine1 || '',
+  addressLine2: '', 
+
+  city: currentClient?.city || '',
+  county: currentClient?.county || '',
+  postcode: currentClient?.postcode || '',
+});
   const [showSuccess, setShowSuccess] = useState(false);
 
   if (!currentClient) {
@@ -38,28 +45,36 @@ export default function Profile({ currentClient }: ProfileProps) {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const updatedClient: Client = {
-      ...currentClient,
-      name: formData.name,
-      email: formData.email,
-      companyDetails: {
-        name: formData.companyName,
-        number: formData.companyNumber,
-        addressLine1: formData.addressLine1,
-        addressLine2: formData.addressLine2,
-        city: formData.city,
-        county: formData.county,
-        postcode: formData.postcode,
-      }
-    };
-    
-    // onUpdateClient(updatedClient);
-    setIsEditing(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  e.preventDefault();
+
+  const parts = formData.name.trim().split(" ");
+  const firstname = parts[0] || "";
+  const surname = parts.slice(1).join(" ");
+
+  const updatedClient: UserT = {
+    ...currentClient,
+
+    firstname,
+    surname,
+
+    email: formData.email,
+
+    companyName: formData.companyName,
+    companyNumber: formData.companyNumber,
+
+    addressLine1: formData.addressLine1,
+
+    city: formData.city,
+    county: formData.county,
+    postcode: formData.postcode,
   };
+
+  // onUpdateClient(updatedClient);
+
+  setIsEditing(false);
+  setShowSuccess(true);
+  setTimeout(() => setShowSuccess(false), 3000);
+};
 
   return (
     <div className="space-y-6">
@@ -234,17 +249,23 @@ export default function Profile({ currentClient }: ProfileProps) {
                   onClick={() => {
                     setIsEditing(false);
                     // Reset form data
-                    setFormData({
-                      name: currentClient.name || '',
-                      email: currentClient.email || '',
-                      companyName: currentClient.companyDetails?.name || '',
-                      companyNumber: currentClient.companyDetails?.number || '',
-                      addressLine1: currentClient.companyDetails?.addressLine1 || '',
-                      addressLine2: currentClient.companyDetails?.addressLine2 || '',
-                      city: currentClient.companyDetails?.city || '',
-                      county: currentClient.companyDetails?.county || '',
-                      postcode: currentClient.companyDetails?.postcode || '',
-                    });
+                  setFormData({
+  name: currentClient
+    ? `${currentClient.firstname} ${currentClient.surname}`
+    : '',
+
+  email: currentClient?.email || '',
+
+  companyName: currentClient?.companyName || '',
+  companyNumber: currentClient?.companyNumber || '',
+
+  addressLine1: currentClient?.addressLine1 || '',
+  addressLine2: '', // not موجود in backend
+
+  city: currentClient?.city || '',
+  county: currentClient?.county || '',
+  postcode: currentClient?.postcode || '',
+});
                   }}
                   className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
                 >

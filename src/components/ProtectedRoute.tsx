@@ -32,29 +32,31 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { data, isSuccess, isError, isLoading: isApiLoading } = useVerifyMe();
 
   const [isTransitioning, setIsTransitioning] = useState(true);
+useEffect(() => {
+  if (isSuccess && data?.data) {
+    dispatch(
+      setUser({
+        user: {
+          userId: data.data.id,
 
-  useEffect(() => {
-    setIsTransitioning(true);
-    const timer = setTimeout(() => setIsTransitioning(false), 150);
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
+          firstname: data.data.firstname,
+          surname: data.data.surname,
+          email: data.data.email,
+          role: data.data.role,
 
-  useEffect(() => {
-    if (isSuccess && data?.data) {
-      dispatch(
-        setUser({
-          user: {
-            firstname: data.data.firstname,
-            surname: data.data.surname,
-            email: data.data.email,
-            role: data.data.role,
-            userId: data.data.id
-          },
-        }),
-      );
-    }
-  }, [isSuccess, data, dispatch]);
+          companyName: data.data.company?.name || "",
+          companyNumber: data.data.company?.number || "",
 
+          addressLine1: data.data.address?.line1 || "",
+
+          city: data.data.address?.city || "",
+          county: data.data.address?.county || "",
+          postcode: data.data.address?.postcode || "",
+        },
+      })
+    );
+  }
+}, [isSuccess, data, dispatch]);
   const showLoading = isApiLoading || isTransitioning;
 
   if (!user) {
