@@ -52,8 +52,10 @@ const FALLBACK_ACTIVITIES = [
 /* ──────────────────────────────── component ─────────────────────────────── */
 
 export default function Dashboard({ site }: { site: Site }) {
+
+  if(!site) return;
   const embedUrl = site.url;
-  const hasUrl   = !!site.liveUrl;
+  const hasUrl   = !!site.url;
 
   /* AI stats — fires only when embedUrl is truthy */
   const {
@@ -174,13 +176,13 @@ export default function Dashboard({ site }: { site: Site }) {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
           <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-          Gemini is analysing <span className="text-white font-semibold mx-1">{embedUrl}</span> — stats incoming…
+           <span className="text-white font-semibold mx-1">{embedUrl}</span> — stats incoming…
         </motion.div>
       )}
       {embedUrl && aiError && !aiLoading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
-          AI analysis failed. Showing placeholder data.
+          somewthing went wrong. Showing placeholder data.
         </motion.div>
       )}
 
