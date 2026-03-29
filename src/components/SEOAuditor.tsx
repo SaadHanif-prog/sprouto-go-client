@@ -9,7 +9,7 @@ import { useGetAudit, useReRunAudit, useSendChatMessage, useDownloadTargetsCsv }
 import type { ChatMessage, AuditData } from '@/src/api/auditor-api';
 
 export default function SEOAuditor({ site }: { site: Site }) {
-  if (!site) return <div className="text-white p-6">Loading site data...</div>;
+  if (!site) return;
 
   /* ── Chat state ── */
   const [messages, setMessages] = useState<ChatMessage[]>([

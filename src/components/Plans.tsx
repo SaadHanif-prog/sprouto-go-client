@@ -35,16 +35,17 @@ export default function Plans({ siteId }: { siteId: string }) {
   const handleCheckout = async (item: Plan | Addon) => {
     setProcessingId(item.id);
     try {
-      const storedEmail = window.localStorage.getItem("sprouto_client_email");
-      const customerEmail = storedEmail
-        ? JSON.parse(storedEmail)
-        : "client@example.com";
+      const isAddon = addons.some((a) => a.id === item.id);
 
-      const { data } = await apiClient.post("/subscription/create", {
-        planId: item.id,
-        billingCycle: billingCycle,
-        email: customerEmail,
-      });
+      const endpoint = isAddon
+        ? "/subscription/create-addon"
+        : "/subscription/create";
+
+      const payload = isAddon
+        ? { addonId: item.id, billingCycle }
+        : { planId: item.id, billingCycle };
+
+      const { data } = await apiClient.post(endpoint, payload);
 
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);

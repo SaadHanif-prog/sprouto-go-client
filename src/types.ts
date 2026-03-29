@@ -46,8 +46,6 @@ export interface Addon {
   currency: string;
   desc: string;
   icon: string;
-  webhookUrl?: string;
-  secretKey?: string;
 }
 
 export interface Client {
@@ -75,9 +73,31 @@ export const mockPlans: Plan[] = [
 ];
 
 export const mockAddons: Addon[] = [
-  { id: 'a1', name: 'SEO Audit', price: 150, currency: 'GBP', desc: 'Comprehensive SEO analysis', icon: 'Search', webhookUrl: '', secretKey: '' }
+  { 
+    id: 'a1', 
+    name: 'Advanced SEO Pack', 
+    price: 49, 
+    currency: 'GBP', 
+    desc: 'Deep keyword analysis and monthly technical audits.', 
+    icon: 'Globe' 
+  },
+  { 
+    id: 'a2', 
+    name: 'Enterprise Security', 
+    price: 99, 
+    currency: 'GBP', 
+    desc: 'DDoS protection, WAF, and daily malware scans.', 
+    icon: 'Shield' 
+  },
+  { 
+    id: 'a3', 
+    name: 'Speed Optimization', 
+    price: 29, 
+    currency: 'GBP', 
+    desc: 'Global CDN, image optimization, and caching.', 
+    icon: 'Zap' 
+  },
 ];
-
 export const mockClients: Client[] = [
   { id: 'c1', name: 'Sprouto Main', email: 'hello@sprouto.com', plan: 'Pro', status: 'Active', joined: '2026-01-15' },
   { id: 'c2', name: 'Sprouto Blog', email: 'blog@sprouto.com', plan: 'Starter', status: 'Active', joined: '2026-02-20' }

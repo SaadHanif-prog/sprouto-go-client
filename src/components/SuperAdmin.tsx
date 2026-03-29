@@ -4,6 +4,8 @@ import { Users, Package, Plus, Trash2, Save, Sparkles, Globe } from 'lucide-reac
 import { Plan, Addon, Client, mockPlans, mockAddons, mockClients } from '../types';
 import { Site } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useGetAllUsers } from '../hooks new/auth.hook';
+
 
 interface SuperAdminProps {
   sites: Site[];
@@ -11,6 +13,8 @@ interface SuperAdminProps {
 }
 
 export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
+  const { data: usersData } = useGetAllUsers();
+  console.log("User data", usersData)
   const [activeTab, setActiveTab] = useLocalStorage<'clients' | 'plans' | 'sites'>('sprouto_admin_tab', 'clients');
   const [plans, setPlans] = useLocalStorage<Plan[]>('sprouto_plans_v2', mockPlans);
   const [addons, setAddons] = useLocalStorage<Addon[]>('sprouto_addons', mockAddons);
@@ -46,12 +50,12 @@ export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
         >
           <Users className="w-4 h-4" /> Clients
         </button>
-        <button
+        {/* <button
           onClick={() => setActiveTab('plans')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'plans' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white'}`}
         >
           <Package className="w-4 h-4" /> Plans & Add-ons
-        </button>
+        </button> */}
         <button
           onClick={() => setActiveTab('sites')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'sites' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white'}`}
@@ -67,23 +71,23 @@ export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
               <tr>
                 <th className="px-6 py-4 font-medium">Client Name</th>
                 <th className="px-6 py-4 font-medium">Email</th>
-                <th className="px-6 py-4 font-medium">Plan</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Joined</th>
+                {/* <th className="px-6 py-4 font-medium">Plan</th> */}
+                {/* <th className="px-6 py-4 font-medium">Status</th> */}
+                <th className="px-6 py-4 font-medium">Role</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {clients.map(client => (
+              {usersData?.data?.map(client => (
                 <tr key={client.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-6 py-4 text-white font-medium">{client.name}</td>
+                  <td className="px-6 py-4 text-white font-medium">{client.firstname}</td>
                   <td className="px-6 py-4 text-slate-400">{client.email}</td>
-                  <td className="px-6 py-4 text-emerald-400">{client.plan}</td>
-                  <td className="px-6 py-4">
+                  {/* <td className="px-6 py-4 text-emerald-400">{client.plan}</td> */}
+                  {/* <td className="px-6 py-4">
                     <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs border border-emerald-500/20">
                       {client.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">{client.joined}</td>
+                  </td> */}
+                  <td className="px-6 py-4 text-slate-500">{client.role}</td>
                 </tr>
               ))}
             </tbody>
@@ -194,12 +198,12 @@ export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
             ))}
           </div>
 
-          <div className="flex items-center justify-between mt-12 pt-8 border-t border-white/10">
+          {/* <div className="flex items-center justify-between mt-12 pt-8 border-t border-white/10">
             <h2 className="text-xl font-semibold text-white">Manage Add-ons</h2>
             <button onClick={() => setAddons([...addons, { id: 'a' + Date.now(), name: 'New Add-on', price: 0, currency: 'GBP', desc: 'Description', icon: 'Plus', webhookUrl: '', secretKey: '' }])} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm">
               <Plus className="w-4 h-4" /> Add Add-on
             </button>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {addons.map(addon => (
@@ -236,7 +240,7 @@ export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:border-emerald-500 h-20 resize-none"
                     />
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-500 uppercase">Webhook URL</label>
                     <input 
                       type="text" 
@@ -255,7 +259,7 @@ export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
                       placeholder="sk_test_..."
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}

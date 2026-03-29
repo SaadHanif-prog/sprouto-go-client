@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
-// import { GoogleGenAI } from '@google/genai';
 import Markdown from 'react-markdown';
-
-// Initialize the Gemini AI client
-// const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+import { useSelector } from 'react-redux';
+import { useSendChatMessage } from '@/src/hooks new/ai-hook'; 
 
 interface Message {
   id: string;
@@ -15,23 +13,21 @@ interface Message {
 
 export default function AIChat({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'model', content: 'Hi there! I am your SproutoGO AI assistant. How can I help you with your site, targets, or analytics today?' }
+    {
+      id: '1',
+      role: 'model',
+      content: 'Hi there! I am your SproutoGO AI assistant. How can I help you with your site, targets, or analytics today?',
+    },
   ]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatRef = useRef<any>(null);
 
-  // useEffect(() => {
-  //   if (!chatRef.current) {
-  //     chatRef.current = ai.chats.create({
-  //       model: 'gemini-3-flash-preview',
-  //       config: {
-  //         systemInstruction: "You are the AI support assistant for SproutoGO, powered by our innovative AI engine Go's and our bio-diverse system. You are Your Partners built for microbusinesses to redefine their digital presence so they can focus on scaling. You must ALWAYS use UK English spelling and grammar (e.g., \"colour\", \"optimise\", \"programme\", \"£\"). You must respond in a friendly, conversational, and highly human-like manner. Always format your responses with clear, well-spaced paragraphs. Use bullet points when listing items to make them easy to read. Avoid dense walls of text. Be concise but warm and helpful.",
-  //       }
-  //     });
-  //   }
-  // }, []);
+  // Use the logged-in user's ID as a stable session key.
+  // Falls back to a random ID per component mount if no user is available.
+  const user = useSelector((state: any) => state.auth.user);
+  const sessionId = user?.userId ?? useRef(`guest-${Date.now()}`).current;
+
+  const { mutateAsync: sendMessage, isPending: isLoading } = useSendChatMessage();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,30 +41,38 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
-    setIsLoading(true);
 
     try {
-      const response = await chatRef.current.sendMessage({ message: userMessage.content });
-      
+      const response = await sendMessage({
+        message: userMessage.content,
+        sessionId,
+      });
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        content: response.text || 'I am sorry, I could not process that request.'
+        content: response.data.content,
       };
-      
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'model',
-        content: 'Sorry, I encountered an error connecting to the AI service. Please check your API key configuration.'
-      }]);
-    } finally {
-      setIsLoading(false);
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch {
+      // Error toast is already handled inside the hook's onError
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'model',
+          content: 'Sorry, I encountered an error. Please try again in a moment.',
+        },
+      ]);
     }
   };
 
@@ -91,7 +95,7 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
             <p className="text-xs text-emerald-400/80">Always here to help</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={onClose}
           className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white"
         >
@@ -102,8 +106,8 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-transparent">
         {messages.map((msg) => (
-          <div 
-            key={msg.id} 
+          <div
+            key={msg.id}
             className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {msg.role === 'model' && (
@@ -111,10 +115,10 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
                 <Bot className="w-4 h-4 text-emerald-400" />
               </div>
             )}
-            <div 
+            <div
               className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed break-words ${
-                msg.role === 'user' 
-                  ? 'bg-emerald-500 text-[#050505] rounded-tr-sm font-medium shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
+                msg.role === 'user'
+                  ? 'bg-emerald-500 text-[#050505] rounded-tr-sm font-medium shadow-[0_0_15px_rgba(16,185,129,0.2)]'
                   : 'bg-white/5 border border-white/10 text-slate-300 rounded-tl-sm shadow-sm'
               }`}
             >
@@ -133,6 +137,7 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
             )}
           </div>
         ))}
+
         {isLoading && (
           <div className="flex gap-3 justify-start">
             <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-1">
@@ -144,6 +149,7 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 

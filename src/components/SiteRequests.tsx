@@ -26,8 +26,6 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
 
   const { data: usersData } = useGetAllUsers();
 
-  console.log("users data", usersData)
-
 
   const developers =
     usersData?.data?.filter((u: any) => u.role === "developer") || [];

@@ -4,7 +4,8 @@ type EndpointsType = {
   requests: "/requests";
   stats: "/stats"
   targets: "/targets",
-  auditor: "/auditor"
+  auditor: "/auditor",
+  ai: "/ai"
 
 };
 
@@ -14,7 +15,8 @@ const ENDPOINTS: EndpointsType = {
   requests: "/requests",
   stats: "/stats",
   targets: "/targets",
-  auditor: "/auditor"
+  auditor: "/auditor",
+  ai: "/ai"
 };
 
 export default ENDPOINTS;

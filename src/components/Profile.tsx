@@ -82,14 +82,14 @@ export default function Profile({ currentClient }: ProfileProps) {
           <h2 className="text-2xl font-display font-bold text-white tracking-tight">Your Profile</h2>
           <p className="text-slate-400 text-sm mt-1">Manage your personal and company information.</p>
         </div>
-        {!isEditing && (
+        {/* {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm font-medium transition-colors border border-white/10"
           >
             Edit Profile
           </button>
-        )}
+        )} */}
       </div>
 
       {showSuccess && (
@@ -103,7 +103,7 @@ export default function Profile({ currentClient }: ProfileProps) {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit} className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-8">
             {/* Personal Info */}
@@ -283,8 +283,7 @@ export default function Profile({ currentClient }: ProfileProps) {
         </div>
 
         {/* Sidebar Cards */}
-        <div className="space-y-6">
-          {/* Payment Methods */}
+        {/* <div className="space-y-6">
           <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
             <h3 className="text-lg font-medium text-white flex items-center gap-2 mb-4">
               <CreditCard className="w-5 h-5 text-emerald-400" />
@@ -310,7 +309,6 @@ export default function Profile({ currentClient }: ProfileProps) {
             </div>
           </div>
 
-          {/* Security */}
           <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
             <h3 className="text-lg font-medium text-white flex items-center gap-2 mb-4">
               <Shield className="w-5 h-5 text-emerald-400" />
@@ -338,7 +336,7 @@ export default function Profile({ currentClient }: ProfileProps) {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

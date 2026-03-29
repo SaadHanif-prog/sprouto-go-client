@@ -116,7 +116,7 @@ export default function App() {
       ] as const);
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#050505] flex overflow-hidden font-sans text-slate-300 selection:bg-emerald-500/30">
+      <div className="h-screen bg-[#050505] flex overflow-hidden font-sans text-slate-300 selection:bg-emerald-500/30">
         {/* Sidebar */}
         <motion.aside
           initial={false}
@@ -269,9 +269,9 @@ export default function App() {
 
               <div
                 onClick={() => setActiveTab("profile")}
-                className="w-10 h-10 rounded-full bg-slate-800 border border-white/20 overflow-hidden cursor-pointer"
+                className="flex justify-center items-center w-10 h-10 rounded-full bg-white/5 border border-white/20 cursor-pointer"
               >
-                <img src="https://picsum.photos/seed/user/100/100" alt="User" />
+               <span>{user?.firstname[0]}</span>
               </div>
             </div>
           </header>

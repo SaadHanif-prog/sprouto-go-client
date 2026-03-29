@@ -52,8 +52,7 @@ const FALLBACK_ACTIVITIES = [
 /* ──────────────────────────────── component ─────────────────────────────── */
 
 export default function Dashboard({ site }: { site: Site }) {
-
-  if(!site) return;
+  if (!site) return;
   const embedUrl = site.url;
   const hasUrl   = !!site.url;
 
