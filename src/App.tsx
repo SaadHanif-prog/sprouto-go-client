@@ -287,7 +287,7 @@ export default function App() {
                   />
                 )}
                 {activeTab === "targets" && (
-                  <Targets siteId={selectedSiteId} />
+                  <Targets site={selectedSite} />
                 )}
                 {activeTab === "auditor" && (
                   <SEOAuditor site={selectedSite} />
