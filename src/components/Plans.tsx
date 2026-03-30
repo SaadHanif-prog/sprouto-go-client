@@ -66,7 +66,7 @@ export default function Plans({ siteId }: { siteId: string }) {
           <CheckoutForm
             clientSecret={clientSecret}
             onClose={() => setClientSecret(null)}
-          />{" "}
+          />
         </StripeProvider>
       )}
       <div className="text-center max-w-2xl mx-auto">

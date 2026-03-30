@@ -14,7 +14,6 @@ interface SuperAdminProps {
 
 export default function SuperAdmin({ sites, setSites }: SuperAdminProps) {
   const { data: usersData } = useGetAllUsers();
-  console.log("User data", usersData)
   const [activeTab, setActiveTab] = useLocalStorage<'clients' | 'plans' | 'sites'>('sprouto_admin_tab', 'clients');
   const [plans, setPlans] = useLocalStorage<Plan[]>('sprouto_plans_v2', mockPlans);
   const [addons, setAddons] = useLocalStorage<Addon[]>('sprouto_addons', mockAddons);

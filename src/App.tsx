@@ -36,7 +36,6 @@ import SEOAuditor from "./components/SEOAuditor";
 import Profile from "./components/Profile";
 import Sites from "./components/Sites";
 
-import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useGetSites } from "./hooks new/sites.hook";
@@ -50,6 +49,19 @@ export type Tab =
   | "superadmin"
   | "profile"
   | "sites";
+
+const defaultTabForRole = (role?: string): Tab => {
+  if (role === "developer") return "requests";
+  if (role === "superadmin") return "superadmin";
+  return "dashboard";
+};
+
+const allowedTabsPerRole: Record<string, Tab[]> = {
+  superadmin: ["superadmin", "dashboard", "requests", "targets", "auditor", "plans", "sites", "profile"],
+  developer: ["requests", "profile"],
+  admin: ["dashboard", "requests", "targets", "auditor", "plans", "sites", "profile"],
+  client: ["dashboard", "requests", "targets", "auditor", "plans", "sites", "profile"],
+};
 
 export default function App() {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -71,10 +83,7 @@ export default function App() {
     }
   }, [data?.data]);
 
-  const [activeTab, setActiveTab] = useLocalStorage<Tab>(
-    "sprouto_tab",
-    "dashboard",
-  );
+  const [activeTab, setActiveTab] = useState<Tab>(() => defaultTabForRole(userRole));
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -82,38 +91,44 @@ export default function App() {
 
   const visibleSites = sites;
 
-  // Prevent non-superadmin access
+  // Reset to valid tab whenever the logged-in role changes
   useEffect(() => {
-    if (activeTab === "superadmin" && userRole !== "superadmin") {
-      setActiveTab("dashboard");
+    if (!userRole) return;
+    const allowed = allowedTabsPerRole[userRole] ?? ["dashboard"];
+    if (!allowed.includes(activeTab)) {
+      setActiveTab(defaultTabForRole(userRole));
     }
-  }, [activeTab, userRole, setActiveTab]);
+  }, [userRole]);
 
   const navItems =
-  userRole === "superadmin"
-    ? ([
-        { id: "superadmin", label: "Super Admin", icon: ShieldAlert },
-        { id: "dashboard", label: "Overview", icon: LayoutDashboard },
-        { id: "requests", label: "All Requests", icon: Settings },
-        { id: "targets", label: "Monthly Targets", icon: Target },
-        { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
-        { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-      ] as const)
-    : userRole === "developer"
-    ? ([
-        { id: "requests", label: "Assigned Requests", icon: Settings },
-      ] as const)
-    : ([
-        { id: "dashboard", label: "Overview", icon: LayoutDashboard },
-        {
-          id: "requests",
-          label: userRole === "admin" ? "All Requests" : "Site Requests",
-          icon: Settings,
-        },
-        { id: "targets", label: "Monthly Targets", icon: Target },
-        { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
-        { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-      ] as const);
+    userRole === "superadmin"
+      ? ([
+          { id: "superadmin", label: "Super Admin", icon: ShieldAlert },
+          { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+          { id: "requests", label: "All Requests", icon: Settings },
+          { id: "targets", label: "Monthly Targets", icon: Target },
+          { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
+          { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+        ] as const)
+      : userRole === "developer"
+      ? ([
+          { id: "requests", label: "Assigned Requests", icon: Settings },
+        ] as const)
+      : ([
+          { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+          {
+            id: "requests",
+            label: userRole === "admin" ? "All Requests" : "Site Requests",
+            icon: Settings,
+          },
+          { id: "targets", label: "Monthly Targets", icon: Target },
+          { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
+          { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+        ] as const);
+
+  const isAllowed = (tab: Tab) =>
+    (allowedTabsPerRole[userRole ?? ""] ?? []).includes(tab);
+
   return (
     <ProtectedRoute>
       <div className="h-screen bg-[#050505] flex overflow-hidden font-sans text-slate-300 selection:bg-emerald-500/30">
@@ -133,81 +148,83 @@ export default function App() {
             </div>
           </div>
 
-         {userRole !== "developer" &&   <div className="p-4">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
-              Your Sites ({visibleSites.length})
-            </div>
+          {userRole !== "developer" && (
+            <div className="p-4">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
+                Your Sites ({visibleSites.length})
+              </div>
 
-            <div className="relative">
-              <button
-                onClick={() => setIsSiteSelectorOpen(!isSiteSelectorOpen)}
-                className="w-full flex items-center justify-between bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-3 rounded-xl transition-all"
-              >
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium text-white">
-                    {selectedSite?.name || "No Site Selected"}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {selectedSite?.url || "No URL"}
-                  </span>
-                </div>
+              <div className="relative">
+                <button
+                  onClick={() => setIsSiteSelectorOpen(!isSiteSelectorOpen)}
+                  className="w-full flex items-center justify-between bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-3 rounded-xl transition-all"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-white">
+                      {selectedSite?.name || "No Site Selected"}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {selectedSite?.url || "No URL"}
+                    </span>
+                  </div>
 
-                <ChevronDown
-                  className={`w-4 h-4 text-slate-400 transition-transform ${
-                    isSiteSelectorOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-400 transition-transform ${
+                      isSiteSelectorOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-              <AnimatePresence>
-                {isSiteSelectorOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full left-0 w-full mt-2 bg-[#141414] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
-                  >
-                    {visibleSites.map((site: any) => (
-                      <button
-                        key={site.id}
-                        onClick={() => {
-                          dispatch(setSelectedSite(site.id));
-                          setIsSiteSelectorOpen(false);
-                        }}
-                        className={`w-full flex flex-col items-start px-4 py-3 hover:bg-white/5 transition-colors ${
-                          selectedSiteId === site.id
-                            ? "bg-emerald-500/10 border-l-2 border-emerald-500"
-                            : "border-l-2 border-transparent"
-                        }`}
-                      >
-                        <span
-                          className={`text-sm font-medium ${
+                <AnimatePresence>
+                  {isSiteSelectorOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-full left-0 w-full mt-2 bg-[#141414] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                    >
+                      {visibleSites.map((site: any) => (
+                        <button
+                          key={site.id}
+                          onClick={() => {
+                            dispatch(setSelectedSite(site.id));
+                            setIsSiteSelectorOpen(false);
+                          }}
+                          className={`w-full flex flex-col items-start px-4 py-3 hover:bg-white/5 transition-colors ${
                             selectedSiteId === site.id
-                              ? "text-emerald-400"
-                              : "text-white"
+                              ? "bg-emerald-500/10 border-l-2 border-emerald-500"
+                              : "border-l-2 border-transparent"
                           }`}
                         >
-                          {site.name}
-                        </span>
-                      </button>
-                    ))}
+                          <span
+                            className={`text-sm font-medium ${
+                              selectedSiteId === site.id
+                                ? "text-emerald-400"
+                                : "text-white"
+                            }`}
+                          >
+                            {site.name}
+                          </span>
+                        </button>
+                      ))}
 
-                    {/* ✅ ADD NEW SITE (RESTORED — ONLY CHANGE) */}
-                    <button
-                      onClick={() => {
-                        setActiveTab("sites");
-                        setIsSiteSelectorOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-white/5"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add New Site
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      <button
+                        onClick={() => {
+                          setActiveTab("sites");
+                          setIsSiteSelectorOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-white/5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add New Site
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
-          </div>}
+          )}
+
           {/* Menu */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
@@ -243,7 +260,7 @@ export default function App() {
           </div>
         </motion.aside>
 
-        {/* Main (UNCHANGED) */}
+        {/* Main */}
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#050505]">
           <header className="h-20 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 lg:px-10 z-10">
             <div className="flex items-center gap-4">
@@ -271,7 +288,7 @@ export default function App() {
                 onClick={() => setActiveTab("profile")}
                 className="flex justify-center items-center w-10 h-10 rounded-full bg-white/5 border border-white/20 cursor-pointer"
               >
-               <span>{user?.firstname[0]}</span>
+                <span>{user?.firstname[0]}</span>
               </div>
             </div>
           </header>
@@ -279,30 +296,28 @@ export default function App() {
           <div className="flex-1 overflow-y-auto p-6">
             <AnimatePresence mode="wait">
               <motion.div key={`${activeTab}-${selectedSiteId}`}>
-                {activeTab === "dashboard" && <Dashboard site={selectedSite} />}
-                {activeTab === "requests" && (
-                  <SiteRequests
-                    role={userRole}
-                    sitePlan={selectedSite?.plan}
-                  />
+                {activeTab === "dashboard" && isAllowed("dashboard") && (
+                  <Dashboard site={selectedSite} />
                 )}
-                {activeTab === "targets" && (
+                {activeTab === "requests" && isAllowed("requests") && (
+                  <SiteRequests role={userRole} sitePlan={selectedSite?.plan} />
+                )}
+                {activeTab === "targets" && isAllowed("targets") && (
                   <Targets site={selectedSite} />
                 )}
-                {activeTab === "auditor" && (
+                {activeTab === "auditor" && isAllowed("auditor") && (
                   <SEOAuditor site={selectedSite} />
                 )}
-                {activeTab === "plans" && (
+                {activeTab === "plans" && isAllowed("plans") && (
                   <Plans siteId={selectedSiteId} />
                 )}
-                {activeTab === "sites" && <Sites />}
-                {activeTab === "profile" && (
+                {activeTab === "sites" && isAllowed("sites") && <Sites />}
+                {activeTab === "profile" && isAllowed("profile") && (
                   <Profile currentClient={user} />
                 )}
-                {activeTab === "superadmin" &&
-                  userRole === "superadmin" && (
-                    <SuperAdmin sites={sites} />
-                  )}
+                {activeTab === "superadmin" && isAllowed("superadmin") && (
+                  <SuperAdmin sites={sites} />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>

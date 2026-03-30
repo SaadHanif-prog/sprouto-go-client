@@ -21,16 +21,27 @@ const overlayStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   zIndex: 999,
+  padding: "16px",
+  boxSizing: "border-box",
 };
 
 const modalStyle: React.CSSProperties = {
   width: "100%",
   maxWidth: "420px",
+  maxHeight: "90vh",
   background: "#1a1a1a",
-  padding: "24px",
   borderRadius: "12px",
   boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-  position: "relative", // ✅ important for close button positioning
+  position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden",
+};
+
+const scrollableBodyStyle: React.CSSProperties = {
+  padding: "24px",
+  overflowY: "auto",
+  flexGrow: 1,
 };
 
 export default function CheckoutForm({ clientSecret, onClose }: Props) {
@@ -67,11 +78,9 @@ export default function CheckoutForm({ clientSecret, onClose }: Props) {
 
     if (result.paymentIntent?.status === "succeeded") {
       setMessage("✅ Payment successful!");
-
       setTimeout(() => {
-        onClose?.(); // ✅ closes modal
+        onClose?.();
       }, 1200);
-
       return;
     }
 
@@ -80,18 +89,12 @@ export default function CheckoutForm({ clientSecret, onClose }: Props) {
   };
 
   return (
-    <div
-      style={overlayStyle}
-      onClick={!loading ? onClose : undefined} // ✅ click outside to close
-    >
-      <div
-        style={modalStyle}
-        onClick={(e) => e.stopPropagation()} // ✅ prevent close on inside click
-      >
+    <div style={overlayStyle} onClick={!loading ? onClose : undefined}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
         <button
           onClick={onClose}
-          disabled={loading} // ✅ prevent closing while paying
+          disabled={loading}
           style={{
             position: "absolute",
             top: 10,
@@ -101,45 +104,47 @@ export default function CheckoutForm({ clientSecret, onClose }: Props) {
             color: "#fff",
             fontSize: "14px",
             cursor: "pointer",
+            zIndex: 1,
           }}
         >
           ✕
         </button>
 
-        <form onSubmit={handleSubmit}>
-          <PaymentElement />
+        {/* Scrollable content area */}
+        <div style={scrollableBodyStyle}>
+          <form onSubmit={handleSubmit}>
+            <PaymentElement />
 
-          <button
-            type="submit"
-            disabled={!stripe || loading}
-            style={{
-              marginTop: 16,
-              width: "100%",
-              padding: "10px",
-              borderRadius: "6px",
-              border: "none",
-              background: "#635bff",
-              color: "#fff",
-              cursor: "pointer",
-            }}
-          >
-            {loading ? "Processing..." : "Pay"}
-          </button>
-
-          {message && (
-            <div
+            <button
+              type="submit"
+              disabled={!stripe || loading}
               style={{
-                marginTop: 12,
-                color: message.includes("successful")
-                  ? "#4caf50"
-                  : "#ff5252",
-                fontSize: "14px",
+                marginTop: 16,
+                width: "100%",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "none",
+                background: "#635bff",
+                color: "#fff",
+                cursor: "pointer",
               }}
             >
-              {message}
-            </div>
-          )}
-        </form>
+              {loading ? "Processing..." : "Pay"}
+            </button>
+
+            {message && (
+              <div
+                style={{
+                  marginTop: 12,
+                  color: message.includes("successful") ? "#4caf50" : "#ff5252",
+                  fontSize: "14px",
+                }}
+              >
+                {message}
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );
