@@ -6,6 +6,7 @@ type EndpointsType = {
   targets: "/targets",
   auditor: "/auditor",
   ai: "/ai"
+  sproutoai: "/sproutoai"
 
 };
 
@@ -16,7 +17,9 @@ const ENDPOINTS: EndpointsType = {
   stats: "/stats",
   targets: "/targets",
   auditor: "/auditor",
-  ai: "/ai"
+  ai: "/ai",
+  sproutoai: "/sproutoai"
+
 };
 
 export default ENDPOINTS;

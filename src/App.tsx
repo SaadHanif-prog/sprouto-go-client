@@ -12,6 +12,7 @@ import {
   Search,
   Plus,
   Menu,
+  Sparkles,
 } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -33,6 +34,7 @@ import Plans from "./components/Plans";
 import AIChat from "./components/AIChat";
 import SuperAdmin from "./components/SuperAdmin";
 import SEOAuditor from "./components/SEOAuditor";
+import SproutoAI from "./components/SproutoAI";
 import Profile from "./components/Profile";
 import Sites from "./components/Sites";
 
@@ -45,6 +47,7 @@ export type Tab =
   | "requests"
   | "targets"
   | "auditor"
+  | "sproutoai"
   | "plans"
   | "superadmin"
   | "profile"
@@ -57,10 +60,35 @@ const defaultTabForRole = (role?: string): Tab => {
 };
 
 const allowedTabsPerRole: Record<string, Tab[]> = {
-  superadmin: ["superadmin", "dashboard", "requests", "targets", "auditor", "plans", "sites", "profile"],
+  superadmin: [
+    "superadmin",
+    "dashboard",
+    "requests",
+    "targets",
+    "auditor",
+    "plans",
+    "sites",
+    "profile",
+  ],
   developer: ["requests", "profile"],
-  admin: ["dashboard", "requests", "targets", "auditor", "plans", "sites", "profile"],
-  client: ["dashboard", "requests", "targets", "auditor", "plans", "sites", "profile"],
+  admin: [
+    "dashboard",
+    "requests",
+    "targets",
+    "auditor",
+    "plans",
+    "sites",
+    "profile",
+  ],
+  client: [
+    "dashboard",
+    "requests",
+    "targets",
+    "auditor",
+    "plans",
+    "sites",
+    "profile",
+  ],
 };
 
 export default function App() {
@@ -92,10 +120,10 @@ export default function App() {
   const visibleSites = sites;
 
   // Reset to valid tab whenever the logged-in role changes
- useEffect(() => {
-  if (!userRole) return;
-  setActiveTab(defaultTabForRole(userRole));
-}, [userRole]);
+  useEffect(() => {
+    if (!userRole) return;
+    setActiveTab(defaultTabForRole(userRole));
+  }, [userRole]);
 
   const navItems =
     userRole === "superadmin"
@@ -105,23 +133,25 @@ export default function App() {
           { id: "requests", label: "All Requests", icon: Settings },
           { id: "targets", label: "Monthly Targets", icon: Target },
           { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
+          { id: "sproutoai", label: "SproutoAI", icon: Sparkles },
           { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
         ] as const)
       : userRole === "developer"
-      ? ([
-          { id: "requests", label: "Assigned Requests", icon: Settings },
-        ] as const)
-      : ([
-          { id: "dashboard", label: "Overview", icon: LayoutDashboard },
-          {
-            id: "requests",
-            label: userRole === "admin" ? "All Requests" : "Site Requests",
-            icon: Settings,
-          },
-          { id: "targets", label: "Monthly Targets", icon: Target },
-          { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
-          { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-        ] as const);
+        ? ([
+            { id: "requests", label: "Assigned Requests", icon: Settings },
+          ] as const)
+        : ([
+            { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+            {
+              id: "requests",
+              label: userRole === "admin" ? "All Requests" : "Site Requests",
+              icon: Settings,
+            },
+            { id: "targets", label: "Monthly Targets", icon: Target },
+            { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
+            { id: "sproutoai", label: "SproutoAI", icon: Sparkles },
+            { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+          ] as const);
 
   const isAllowed = (tab: Tab) =>
     (allowedTabsPerRole[userRole ?? ""] ?? []).includes(tab);
@@ -132,9 +162,9 @@ export default function App() {
         {/* Sidebar */}
         <motion.aside
           initial={false}
-          animate={{ x: isSidebarOpen ? 0 : -280 }}
+          animate={{ width: isSidebarOpen ? 280 : 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="fixed lg:relative z-50 h-full w-[280px] bg-[#0a0a0a] border-r border-white/5 flex flex-col"
+          className="relative h-full bg-[#0a0a0a] border-r border-white/5 flex flex-col overflow-hidden"
         >
           <div className="p-6 flex items-center justify-between border-b border-white/5">
             <div className="flex items-center gap-3">
@@ -305,6 +335,8 @@ export default function App() {
                 {activeTab === "auditor" && isAllowed("auditor") && (
                   <SEOAuditor site={selectedSite} />
                 )}
+                {activeTab === "sproutoai" && <SproutoAI site={selectedSite} />}
+
                 {activeTab === "plans" && isAllowed("plans") && (
                   <Plans siteId={selectedSiteId} />
                 )}
