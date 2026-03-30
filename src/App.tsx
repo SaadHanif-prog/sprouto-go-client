@@ -83,7 +83,7 @@ export default function App() {
     }
   }, [data?.data]);
 
-  const [activeTab, setActiveTab] = useState<Tab>(() => defaultTabForRole(userRole));
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -92,13 +92,10 @@ export default function App() {
   const visibleSites = sites;
 
   // Reset to valid tab whenever the logged-in role changes
-  useEffect(() => {
-    if (!userRole) return;
-    const allowed = allowedTabsPerRole[userRole] ?? ["dashboard"];
-    if (!allowed.includes(activeTab)) {
-      setActiveTab(defaultTabForRole(userRole));
-    }
-  }, [userRole]);
+ useEffect(() => {
+  if (!userRole) return;
+  setActiveTab(defaultTabForRole(userRole));
+}, [userRole]);
 
   const navItems =
     userRole === "superadmin"
