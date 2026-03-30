@@ -4,7 +4,7 @@ export const apiClient = axios.create({
   baseURL:
     import.meta.env.VITE_ENV === "development"
       ? "http://localhost:5000/api/v1"
-      : "https://sprouto-go-server.onrender.com/api/v1",
+      : "https://sprouto-go-server.onrender.com/api/v1", 
   withCredentials: true,
 });
 
