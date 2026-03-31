@@ -41,6 +41,8 @@ import Sites from "./components/Sites";
 import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useGetSites } from "./hooks new/sites.hook";
+import ResetPassword from "./components/ResetPassword";
+import { useLocation } from "react-router-dom";
 
 export type Tab =
   | "dashboard"
@@ -92,6 +94,12 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
 };
 
 export default function App() {
+   const path = window.location.pathname;
+
+  if (path.includes("reset-password")) {
+    return <ResetPassword />;
+  }
+
   const { user } = useSelector((state: RootState) => state.auth);
   const userRole = user?.role;
 

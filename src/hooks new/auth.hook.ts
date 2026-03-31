@@ -17,6 +17,10 @@ import type {
   LoginApiResponse,
   VerifyMe,
   GetAllUsersApiResponse,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
+  ForgotPasswordPayload,
+  ForgotPasswordResponse,
 } from "@/src/types/auth.types";
 import type { AxiosError } from "axios";
 
@@ -27,6 +31,8 @@ import {
   verifyMe,
   logout,
   getAllUsers,
+  resetPassword,
+  forgotPassword,
 } from "@/src/api/auth.api";
 
 // Redux actions
@@ -139,6 +145,7 @@ export const useVerifyMe = (): UseQueryResult<
   return useQuery({
     queryKey: ["verifyMe"],
     queryFn: verifyMe,
+    retry: false
   });
 };
 
@@ -151,3 +158,62 @@ export const useGetAllUsers = (): UseQueryResult<
     queryFn: getAllUsers,
   });
 };
+
+
+// ================= FORGOT PASSWORD =================
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: (payload: ForgotPasswordPayload) =>
+      forgotPassword(payload),
+
+    onSuccess: (data: ForgotPasswordResponse) => {
+      toast.success(data.message || "Reset link sent.");
+    },
+
+    onError: (error: AxiosError<ErrorResponse>) => {
+      toast.error(error.response?.data?.message || error.message);
+    },
+  });
+};
+
+
+// ================= RESET PASSWORD =================
+export const useResetPassword = () => {
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      token,
+      payload,
+    }: {
+      token: string;
+      payload: ResetPasswordPayload;
+    }) => resetPassword(token, payload),
+
+    onSuccess: async (data: ResetPasswordResponse) => {
+      toast.success(data.message || "Password reset successful.");
+
+      try {
+        // 🔥 clear cookies from backend
+        await logout();
+      } catch (e) {
+        // even if logout fails, continue cleanup
+        console.warn("Logout after reset failed");
+      }
+
+      dispatch(logoutAction());
+
+      // 🔥 clear all cached queries
+      queryClient.clear();
+
+      // 🔥 force ProtectedRoute to re-evaluate
+      window.location.reload();
+    },
+
+    onError: (error: AxiosError<ErrorResponse>) => {
+      toast.error(error.response?.data?.message || error.message);
+    },
+  });
+};
+

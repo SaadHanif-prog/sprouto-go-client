@@ -1,5 +1,5 @@
 import { apiClient } from "@/src/api/apiClient";
-import type {SignupApiResponse, CreateSignup, LoginApiResponse, CreateLogin, VerifyMe, LogoutApiResponse, GetAllUsersApiResponse} from "../types/auth.types";
+import type {SignupApiResponse, CreateSignup, LoginApiResponse, CreateLogin, VerifyMe, LogoutApiResponse, GetAllUsersApiResponse, ForgotPasswordPayload, ForgotPasswordResponse, ResetPasswordPayload, ResetPasswordResponse} from "../types/auth.types";
 
 import ENDPOINTS from "@/src/api/endpoints";
 
@@ -31,6 +31,30 @@ export const verifyMe = async (): Promise<VerifyMe> => {
 export const getAllUsers = async (): Promise<GetAllUsersApiResponse> => {
   const { data } = await apiClient.get<GetAllUsersApiResponse>(
     `${ENDPOINTS.auth}/users`
+  );
+  return data;
+};
+
+
+// Forgot Password
+export const forgotPassword = async (
+  payload: ForgotPasswordPayload
+): Promise<ForgotPasswordResponse> => {
+  const { data } = await apiClient.post<ForgotPasswordResponse>(
+    `${ENDPOINTS.auth}/forgot-password`,
+    payload
+  );
+  return data;
+};
+
+// Reset Password
+export const resetPassword = async (
+  token: string,
+  payload: ResetPasswordPayload
+): Promise<ResetPasswordResponse> => {
+  const { data } = await apiClient.post<ResetPasswordResponse>(
+    `${ENDPOINTS.auth}/reset-password/${token}`,
+    payload
   );
   return data;
 };

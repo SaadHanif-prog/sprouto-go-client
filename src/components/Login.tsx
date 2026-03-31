@@ -10,10 +10,13 @@ import { Role, Plan, mockPlans } from '../types';
 import type { CreateSignup } from '../types/auth.types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useLogin, useSignup } from '../hooks new/auth.hook';
+import ForgotPasswordModal from "./ForgotPassword";
+
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
   const [viewMode, setViewMode] = useState<'landing' | 'auth' | 'privacy' | 'cookies' | 'data'>('landing');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [signupStep, setSignupStep] = useState(1);
@@ -614,7 +617,15 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center flex justify-between">
+            <button
+              type="button"
+              onClick={() => setIsForgotOpen(true)}
+              className="text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              Forgot password?
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -1071,6 +1082,10 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       {viewMode === 'privacy' && <PrivacyPolicy onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
       {viewMode === 'cookies' && <CookiesPolicy onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
       {viewMode === 'data' && <DataUsage onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
+        <ForgotPasswordModal
+         isOpen={isForgotOpen}
+         onClose={() => setIsForgotOpen(false)}
+        />
     </div>
   );
 }

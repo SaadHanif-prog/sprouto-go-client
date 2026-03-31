@@ -10,7 +10,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Plan, Addon, mockPlans, mockAddons } from "../types";
-// ❌ removed useLocalStorage import
 import CheckoutForm from "./Checkoutform";
 import apiClient from "../api/apiClient";
 import StripeProvider from "./StripeProvider";

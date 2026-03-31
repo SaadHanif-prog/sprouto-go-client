@@ -133,3 +133,23 @@ export type LogoutApiResponse = {
   success: boolean;
   message: string;
 };
+
+// ================= FORGOT PASSWORD =================
+export type ForgotPasswordPayload = {
+  email: string;
+};
+
+export type ForgotPasswordResponse = {
+  success: boolean;
+  message: string;
+};
+
+// ================= RESET PASSWORD =================
+export type ResetPasswordPayload = {
+  password: string;
+};
+
+export type ResetPasswordResponse = {
+  success: boolean;
+  message: string;
+};
