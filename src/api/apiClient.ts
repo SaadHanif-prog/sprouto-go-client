@@ -9,7 +9,7 @@ export const apiClient = axios.create({
 });
 
 // Response interceptor
-apiClient.interceptors.response.use(
+apiClient.interceptors.response.use( 
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
