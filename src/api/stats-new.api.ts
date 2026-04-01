@@ -41,7 +41,7 @@ export interface AiStatsResponse {
 
 // ================= CONNECT GOOGLE =================
 export const connectGoogle = async (): Promise<void> => {
-  window.location.href = `http://localhost:5000/api/v1/google/connect-google`;
+  window.location.href = `https://sprouto-go-server.onrender.com/api/v1/google/connect-google`;
 };
 
 // ================= GET AI STATS =================
