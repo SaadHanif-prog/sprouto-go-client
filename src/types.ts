@@ -86,33 +86,33 @@ export const mockPlans: Plan[] = [
 ];
 
 export const mockAddons: Addon[] = [
-  {
-    id: "a1",
-    name: "Advanced SEO Pack",
-    price: 49,
-    currency: "GBP",
-    desc: "Deep keyword analysis and monthly technical audits.",
-    icon: "Globe",
-  },
-  {
-    id: "a2",
-    name: "Enterprise Security",
-    price: 99,
-    currency: "GBP",
-    desc: "DDoS protection, WAF, and daily malware scans.",
-    icon: "Shield",
-  },
-  {
-    id: "a3",
-    name: "Speed Optimization",
-    price: 29,
-    currency: "GBP",
-    desc: "Global CDN, image optimization, and caching.",
-    icon: "Zap",
-  },
+  // {
+  //   id: "a1",
+  //   name: "Advanced SEO Pack",
+  //   price: 49,
+  //   currency: "GBP",
+  //   desc: "Deep keyword analysis and monthly technical audits.",
+  //   icon: "Globe",
+  // },
+  // {
+  //   id: "a2",
+  //   name: "Enterprise Security",
+  //   price: 99,
+  //   currency: "GBP",
+  //   desc: "DDoS protection, WAF, and daily malware scans.",
+  //   icon: "Shield",
+  // },
+  // {
+  //   id: "a3",
+  //   name: "Speed Optimization",
+  //   price: 29,
+  //   currency: "GBP",
+  //   desc: "Global CDN, image optimization, and caching.",
+  //   icon: "Zap",
+  // },
   {
     id: "a4",
-    name: "SproutoAi support",
+    name: "SproutoAI support",
     price: 9,
     currency: "GBP",
     desc: "Priority support, AI assistance, and quick issue resolution.",
