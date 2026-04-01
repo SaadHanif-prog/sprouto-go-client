@@ -57,6 +57,7 @@ const buildSessionId = (userId: string | undefined, siteUrl: string): string => 
 /* ================= COMPONENT ================= */
 
 export default function SproutoAI({ site }: SproutoAIProps) {
+  if(!site) return;
   const user = useSelector((state: any) => state.auth.user);
 
   // Stable session ID — scoped per-user AND per-site

@@ -5,15 +5,16 @@ export interface Site {
   plan: string;
   liveUrl?: string;
   gaMeasurementId?: string;
+  propertyId?: string;
   clientId?: string;
 }
 
-export type RequestStatus = 'pending' | 'in-progress' | 'completed';
-export type Priority = 'low' | 'medium' | 'high';
+export type RequestStatus = "pending" | "in-progress" | "completed";
+export type Priority = "low" | "medium" | "high";
 
 export interface ChatMessage {
   id: string;
-  sender: 'client' | 'developer';
+  sender: "client" | "developer";
   text: string;
   timestamp: string;
 }
@@ -22,11 +23,11 @@ export interface Attachment {
   id: string;
   name: string;
   size: string;
-  type: 'image' | 'document';
+  type: "image" | "document";
   url?: string;
 }
 
-export type Role = 'client' | 'admin' | 'superadmin';
+export type Role = "client" | "admin" | "superadmin";
 
 export interface Plan {
   id: string;
@@ -68,39 +69,73 @@ export interface Client {
 }
 
 export const mockPlans: Plan[] = [
-  { id: 'starter', name: 'Starter', price: 159, currency: 'GBP', features: ['1 Site', 'Basic Support']},
-  { id: 'pro', name: 'Pro', price: 249, currency: 'GBP', features: ['3 Sites', 'Priority Support']}
+  {
+    id: "starter",
+    name: "Starter",
+    price: 159,
+    currency: "GBP",
+    features: ["1 Site", "Basic Support"],
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: 249,
+    currency: "GBP",
+    features: ["3 Sites", "Priority Support"],
+  },
 ];
 
 export const mockAddons: Addon[] = [
-  { 
-    id: 'a1', 
-    name: 'Advanced SEO Pack', 
-    price: 49, 
-    currency: 'GBP', 
-    desc: 'Deep keyword analysis and monthly technical audits.', 
-    icon: 'Globe' 
+  {
+    id: "a1",
+    name: "Advanced SEO Pack",
+    price: 49,
+    currency: "GBP",
+    desc: "Deep keyword analysis and monthly technical audits.",
+    icon: "Globe",
   },
-  { 
-    id: 'a2', 
-    name: 'Enterprise Security', 
-    price: 99, 
-    currency: 'GBP', 
-    desc: 'DDoS protection, WAF, and daily malware scans.', 
-    icon: 'Shield' 
+  {
+    id: "a2",
+    name: "Enterprise Security",
+    price: 99,
+    currency: "GBP",
+    desc: "DDoS protection, WAF, and daily malware scans.",
+    icon: "Shield",
   },
-  { 
-    id: 'a3', 
-    name: 'Speed Optimization', 
-    price: 29, 
-    currency: 'GBP', 
-    desc: 'Global CDN, image optimization, and caching.', 
-    icon: 'Zap' 
+  {
+    id: "a3",
+    name: "Speed Optimization",
+    price: 29,
+    currency: "GBP",
+    desc: "Global CDN, image optimization, and caching.",
+    icon: "Zap",
+  },
+  {
+    id: "a4",
+    name: "SproutoAi support",
+    price: 9,
+    currency: "GBP",
+    desc: "Priority support, AI assistance, and quick issue resolution.",
+    icon: "Sparkles",
   },
 ];
 export const mockClients: Client[] = [
-  { id: 'c1', name: 'Sprouto Main', email: 'hello@sprouto.com', plan: 'Pro', status: 'Active', joined: '2026-01-15' },
-  { id: 'c2', name: 'Sprouto Blog', email: 'blog@sprouto.com', plan: 'Starter', status: 'Active', joined: '2026-02-20' }
+  {
+    id: "c1",
+    name: "Sprouto Main",
+    email: "hello@sprouto.com",
+    plan: "Pro",
+    status: "Active",
+    joined: "2026-01-15",
+  },
+  {
+    id: "c2",
+    name: "Sprouto Blog",
+    email: "blog@sprouto.com",
+    plan: "Starter",
+    status: "Active",
+    joined: "2026-02-20",
+  },
 ];
 
 export interface SiteRequest {

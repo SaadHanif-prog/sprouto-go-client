@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import type { AxiosError } from "axios";
+
 import {
   createRequest,
   getRequests,
   assignRequest,
-} from "../api/request.api";
+} from "../api/request.api"; // ← uploadFile removed
 
 /* ================= GET REQUESTS ================= */
 
@@ -14,20 +17,37 @@ export const useGetRequests = (siteId?: string) => {
   });
 };
 
-/* ================= CREATE REQUEST ================= */
+/* ================= CREATE REQUEST (with optional file) ================= */
 
-export const useCreateRequest = () => {
+export const useCreateRequestWithUpload = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createRequest,
+    mutationFn: ({
+      file,
+      payload,
+    }: {
+      file?: File;
+      payload: {
+        siteId: string;
+        title: string;
+        description: string;
+        priority: string;
+      };
+    }) => createRequest(payload, file), // ← single call, file sent as multipart
 
     onSuccess: (_, variables) => {
-      // 🔥 invalidate BOTH admin + client views
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       queryClient.invalidateQueries({
-        queryKey: ["requests", variables.siteId],
+        queryKey: ["requests", variables.payload.siteId],
       });
+      toast.success("Request created successfully");
+    },
+
+    onError: (error: AxiosError<any>) => {
+      toast.error(
+        error.response?.data?.message || "Failed to create request"
+      );
     },
   });
 };
@@ -47,8 +67,14 @@ export const useAssignRequest = () => {
     }) => assignRequest(requestId, { developerId }),
 
     onSuccess: () => {
-      // 🔥 refresh everything (admin + client)
       queryClient.invalidateQueries({ queryKey: ["requests"] });
+      toast.success("Request assigned successfully");
+    },
+
+    onError: (error: AxiosError<any>) => {
+      toast.error(
+        error.response?.data?.message || "Failed to assign request"
+      );
     },
   });
 };

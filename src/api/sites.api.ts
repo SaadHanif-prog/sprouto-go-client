@@ -23,6 +23,12 @@ export interface GetSitesResponse {
   data: Site[];
 }
 
+export interface GetAllSitesResponse {
+  success: boolean;
+  data: Site[];
+}
+
+
 // CREATE SITE
 export const createSite = async (payload: CreateSitePayload) => {
   const { data } = await apiClient.post(`${ENDPOINTS.sites}/create`, payload);
@@ -32,5 +38,29 @@ export const createSite = async (payload: CreateSitePayload) => {
 // GET USER SITES
 export const getSites = async (): Promise<GetSitesResponse> => {
   const { data } = await apiClient.get(`${ENDPOINTS.sites}/`);
+  return data;
+};
+
+export interface UpdateSiteSettingsPayload {
+  propertyId?: string;
+  liveUrl?: string;
+}
+
+// UPDATE SITE SETTINGS (Super Admin)
+export const updateSiteSettings = async (
+  siteId: string,
+  payload: UpdateSiteSettingsPayload
+) => {
+  const { data } = await apiClient.patch(
+    `${ENDPOINTS.sites}/${siteId}/settings`,
+    payload
+  );
+  return data;
+};
+
+
+// GET ALL SITES (Super Admin)
+export const getAllSites = async (): Promise<GetAllSitesResponse> => {
+  const { data } = await apiClient.get(`${ENDPOINTS.sites}/all`);
   return data;
 };

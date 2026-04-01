@@ -18,6 +18,7 @@ export type User = {
   city: string;
   county: string;
   postcode: string;
+  addonentitlementid?: string[] | null;
 };
 
 type AuthState = {

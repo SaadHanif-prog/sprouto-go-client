@@ -18,6 +18,7 @@ const iconMap: Record<string, any> = {
   Globe,
   Shield,
   Zap,
+  Sparkles
 };
 
 export default function Plans({ siteId }: { siteId: string }) {

@@ -3,72 +3,73 @@ import ENDPOINTS from "@/src/api/endpoints";
 
 /* ================= TYPES ================= */
 
-export type RequestStatus = "pending" | "in-progress" | "completed";
-export type RequestPriority = "low" | "medium" | "high";
+export type RequestStatus   = "pending" | "in-progress" | "completed";
+export type RequestPriority = string
 
 export interface UserInfo {
-  _id: string;
-  name: string;
+  _id:    string;
+  firstname: string;
+  surname:   string;
   email?: string;
 }
 
 export interface SiteInfo {
-  _id: string;
+  _id:  string;
   name: string;
   url?: string;
 }
 
+export interface Attachment {
+  _id:           string;
+  url:           string;
+  public_id:     string;
+  original_name: string;
+  mimetype:      string;
+  size:          number;
+  createdAt:     string;
+}
+
 export interface Request {
-  _id: string;
-
-  siteId: SiteInfo | string;
-  userId: UserInfo | string;
-
-  // 👇 NEW
+  _id:        string;
+  siteId:     SiteInfo | string;
+  userId:     UserInfo | string;
   assignedTo?: UserInfo | null;
-
-  title: string;
+  title:       string;
   description: string;
-
-  priority: RequestPriority;
-  status: RequestStatus;
-
-  // 👇 FUTURE SAFE (won’t break if missing)
-  messages?: any[];
-  attachments?: any[];
-
-  createdAt: string;
-  updatedAt: string;
+  priority:    RequestPriority;
+  status:      RequestStatus;
+  messages?:   any[];
+  attachments: Attachment[];   
+  createdAt:   string;
+  updatedAt:   string;
 }
 
 export interface GetRequestsResponse {
   success: boolean;
-  data: Request[];
+  data:    Request[];
 }
 
 export interface CreateRequestPayload {
-  siteId: string;
-  title: string;
+  siteId:      string;
+  title:       string;
   description: string;
-  priority: RequestPriority;
+  priority:    RequestPriority;
 }
 
 export interface CreateRequestResponse {
   success: boolean;
-  data: Request;
+  data:    Request;
 }
 
-// 👇 NEW
 export interface AssignRequestPayload {
   developerId: string;
 }
 
 export interface AssignRequestResponse {
   success: boolean;
-  data: Request;
+  data:    Request;
 }
 
-/* ================= API ================= */
 
 // GET REQUESTS
 export const getRequests = async (
@@ -82,13 +83,25 @@ export const getRequests = async (
   return data;
 };
 
-// CREATE REQUEST
+// CREATE REQUEST (optional file → multipart/form-data)
 export const createRequest = async (
-  payload: CreateRequestPayload
+  payload: CreateRequestPayload,
+  file?: File
 ): Promise<CreateRequestResponse> => {
+  const formData = new FormData();
+  formData.append("siteId",      payload.siteId);
+  formData.append("title",       payload.title);
+  formData.append("description", payload.description);
+  formData.append("priority",    payload.priority);
+
+  if (file) {
+    formData.append("file", file); 
+  }
+
   const { data } = await apiClient.post<CreateRequestResponse>(
-    `${ENDPOINTS.requests}`,
-    payload
+    ENDPOINTS.requests,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
   );
 
   return data;
@@ -97,7 +110,7 @@ export const createRequest = async (
 // ASSIGN DEVELOPER
 export const assignRequest = async (
   requestId: string,
-  payload: AssignRequestPayload
+  payload:   AssignRequestPayload
 ): Promise<AssignRequestResponse> => {
   const { data } = await apiClient.patch<AssignRequestResponse>(
     `${ENDPOINTS.requests}/${requestId}/assign`,

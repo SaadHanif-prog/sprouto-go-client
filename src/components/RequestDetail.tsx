@@ -7,10 +7,9 @@ import {
 import { Attachment } from '../types';
 import { useChat } from '@/src/hooks new/chat.hook';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/src/global-states/store'; // ← adjust path if needed
+import { RootState } from '@/src/global-states/store'; 
 
-// Read the access token from cookies (key is whatever your backend sets)
-// Tries "accessToken" first, falls back to "token"
+
 function getTokenFromCookie(): string | null {
   const cookies = document.cookie.split(';');
   for (const c of cookies) {
@@ -74,7 +73,6 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
     onUpdate({ ...request, attachments: merged });
   };
 
-  // msg.senderId._id (from Mongoose populate) vs user.userId (your slice field)
   const isMine = (msg: any): boolean =>{
     console.log("sender id",msg.senderId)
    return !!user?.userId && msg.senderId?._id?.toString() === user.userId;}
@@ -95,7 +93,6 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
       exit={{ opacity: 0, x: -20 }}
       className="fixed inset-0 lg:relative lg:inset-auto bg-[#0a0a0a] lg:bg-[#0a0a0a]/80 backdrop-blur-xl lg:rounded-3xl border-0 lg:border border-white/10 shadow-2xl overflow-hidden flex flex-col h-full lg:h-[80vh] z-[60] lg:z-0"
     >
-      {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="p-4 lg:p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-3 lg:gap-4">
           <button
@@ -148,7 +145,6 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
         </div>
       </div>
 
-      {/* ── Body ───────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
         {/* Left column — description + attachments */}

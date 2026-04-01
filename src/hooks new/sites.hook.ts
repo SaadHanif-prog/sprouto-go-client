@@ -9,7 +9,11 @@ import type { AxiosError } from "axios";
 
 import {
   createSite,
+  getAllSites,
+  GetAllSitesResponse,
   getSites,
+  updateSiteSettings,
+  UpdateSiteSettingsPayload,
   type CreateSitePayload,
   type GetSitesResponse,
 } from "@/src/api/sites.api";
@@ -44,5 +48,40 @@ export const useCreateSite = () => {
     onError: (error: AxiosError<any>) => {
       toast.error(error.response?.data?.message || "Failed to add site");
     },
+  });
+};
+
+
+
+export const useUpdateSiteSettings = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      siteId,
+      payload,
+    }: {
+      siteId: string;
+      payload: UpdateSiteSettingsPayload;
+    }) => updateSiteSettings(siteId, payload),
+
+    onSuccess: () => {
+      toast.success("Site settings saved");
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+
+    onError: (error: AxiosError<any>) => {
+      toast.error(error.response?.data?.message || "Failed to update site settings");
+    },
+  });
+};
+
+
+
+// GET ALL SITES (Super Admin)
+export const useGetAllSites = (): UseQueryResult<GetAllSitesResponse, AxiosError> => {
+  return useQuery({
+    queryKey: ["sites", "all"],
+    queryFn: getAllSites,
   });
 };

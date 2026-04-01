@@ -106,6 +106,8 @@ export type VerifyMe = {
       county: string;
       postcode: string;
     };
+    addonentitlementid?: string[] | null;
+
   };
 };
 

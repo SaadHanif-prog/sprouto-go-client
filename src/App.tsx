@@ -26,6 +26,8 @@ import {
   selectSelectedSiteId,
 } from "@/src/global-states/slices/siteSlice";
 
+import { useConnectGoogle } from "./hooks new/statsnew.hook";
+
 import Logo from "./components/Logo";
 import Dashboard from "./components/Dashboard";
 import SiteRequests from "./components/SiteRequests";
@@ -94,13 +96,14 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
 };
 
 export default function App() {
-   const path = window.location.pathname;
+  const path = window.location.pathname;
 
   if (path.includes("reset-password")) {
     return <ResetPassword />;
   }
 
   const { user } = useSelector((state: RootState) => state.auth);
+
   const userRole = user?.role;
 
   const dispatch = useDispatch();
@@ -111,6 +114,8 @@ export default function App() {
   const sites = useSelector(selectSites);
   const selectedSite = useSelector(selectSelectedSite);
   const selectedSiteId = useSelector(selectSelectedSiteId);
+
+  const connectGoogle = useConnectGoogle();
 
   // sync API → Redux
   useEffect(() => {
@@ -135,7 +140,7 @@ export default function App() {
 
   const navItems =
     userRole === "superadmin"
-      ? ([
+      ? [
           { id: "superadmin", label: "Super Admin", icon: ShieldAlert },
           { id: "dashboard", label: "Overview", icon: LayoutDashboard },
           { id: "requests", label: "All Requests", icon: Settings },
@@ -143,12 +148,10 @@ export default function App() {
           { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
           { id: "sproutoai", label: "SproutoAI", icon: Sparkles },
           { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-        ] as const)
+        ]
       : userRole === "developer"
-        ? ([
-            { id: "requests", label: "Assigned Requests", icon: Settings },
-          ] as const)
-        : ([
+        ? [{ id: "requests", label: "Assigned Requests", icon: Settings }]
+        : [
             { id: "dashboard", label: "Overview", icon: LayoutDashboard },
             {
               id: "requests",
@@ -157,9 +160,15 @@ export default function App() {
             },
             { id: "targets", label: "Monthly Targets", icon: Target },
             { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
-            { id: "sproutoai", label: "SproutoAI", icon: Sparkles },
+
+            ...(userRole === "admin" ||
+            selectedSite?.plan?.trim().toLowerCase() !== "starter" ||
+            user?.addonentitlementid?.includes("a4")
+              ? [{ id: "sproutoai", label: "SproutoAI", icon: Sparkles }]
+              : []),
+
             { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
-          ] as const);
+          ];
 
   const isAllowed = (tab: Tab) =>
     (allowedTabsPerRole[userRole ?? ""] ?? []).includes(tab);
@@ -253,6 +262,14 @@ export default function App() {
                         <Plus className="w-4 h-4" />
                         Add New Site
                       </button>
+                      <button
+                        onClick={() => {
+                          connectGoogle();
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-blue-400 hover:bg-blue-500/10 transition-colors border-t border-white/5"
+                      >
+                        Connect Google
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -307,7 +324,7 @@ export default function App() {
               </button>
 
               <h1 className="text-2xl font-semibold text-white tracking-tight">
-                {user?.firstname || user?.email || "SproutoGO"}
+                {user?.firstname + user?.surname || user?.email || "SproutoGO"}
               </h1>
             </div>
 
@@ -353,7 +370,7 @@ export default function App() {
                   <Profile currentClient={user} />
                 )}
                 {activeTab === "superadmin" && isAllowed("superadmin") && (
-                  <SuperAdmin sites={sites} />
+                  <SuperAdmin />
                 )}
               </motion.div>
             </AnimatePresence>

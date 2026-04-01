@@ -7,6 +7,9 @@ type EndpointsType = {
   auditor: "/auditor",
   ai: "/ai"
   sproutoai: "/sproutoai"
+  statsnew: "/google",
+  upload: "/upload-attachment"
+
 
 };
 
@@ -18,7 +21,10 @@ const ENDPOINTS: EndpointsType = {
   targets: "/targets",
   auditor: "/auditor",
   ai: "/ai",
-  sproutoai: "/sproutoai"
+  sproutoai: "/sproutoai",
+  statsnew: "/google",
+    upload: "/upload-attachment"
+
 
 };
 
