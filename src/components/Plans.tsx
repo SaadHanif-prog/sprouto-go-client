@@ -116,6 +116,7 @@ export default function Plans({ siteId }: { siteId: string }) {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {addons.map((addon, i) => {
+            if(addon.id === "a4" && billingCycle === "annually") return;
             const Icon = iconMap[addon.icon] || Plus;
             return (
               <motion.div
