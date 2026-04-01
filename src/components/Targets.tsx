@@ -116,7 +116,7 @@ function AddTargetModal({
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white tracking-tight">Add New Target</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Gemini will estimate your current baseline</p>
+              <p className="text-xs text-slate-500 mt-0.5">Sprouto AI will estimate your current baseline</p>
             </div>
           </div>
           <button

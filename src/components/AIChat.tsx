@@ -91,7 +91,7 @@ export default function AIChat({ onClose }: { onClose: () => void }) {
             <Sparkles className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-white tracking-tight">Sprouto AI</h3>
+            <h3 className="font-semibold text-sm text-white tracking-tight">Sprouto GO Support</h3>
             <p className="text-xs text-emerald-400/80">Always here to help</p>
           </div>
         </div>

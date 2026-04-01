@@ -74,17 +74,28 @@ export const mockPlans: Plan[] = [
     name: "Starter",
     price: 159,
     currency: "GBP",
-    features: ["1 Site", "Basic Support"],
+    features: [
+      "1 Site",
+      "Basic Support",
+      "GEO Auditor Access",
+      "Monthly Targets",
+    ],
   },
   {
     id: "pro",
     name: "Pro",
     price: 249,
     currency: "GBP",
-    features: ["3 Sites", "Priority Support"],
+    features: [
+      "Starter Plan +",
+      "Sprouto AI",
+      "Priority Support",
+      "Enhanced Content",
+      "Advanced Social Support",
+      "Plugin Support/Development",
+    ],
   },
 ];
-
 export const mockAddons: Addon[] = [
   // {
   //   id: "a1",
@@ -113,7 +124,7 @@ export const mockAddons: Addon[] = [
   {
     id: "a4",
     name: "SproutoAI support",
-    price: 9,
+    price: 9.99,
     currency: "GBP",
     desc: "Priority support, AI assistance, and quick issue resolution.",
     icon: "Sparkles",
