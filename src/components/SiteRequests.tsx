@@ -361,7 +361,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
                   <div className="space-y-2 min-w-0">
 
                     {/* Title row with age indicator dot */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {/* Pulsing dot for non-completed requests */}
                       {request.status !== 'completed' && (
                         <span className="relative flex h-2 w-2 shrink-0">
@@ -380,6 +380,18 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
                           ${ageStyle.dot === 'bg-rose-400'    ? 'text-rose-400    border-rose-500/30    bg-rose-500/10'    : ''}
                         `}>
                           {ageStyle.label}
+                        </span>
+                      )}
+                      {/* Creation date — always shown, right after the label */}
+                      {request.createdAt && (
+                        <span className="text-[10px] text-slate-500 font-medium">
+                          {new Date(request.createdAt).toLocaleDateString('en-GB', {
+                            day:    '2-digit',
+                            month:  'short',
+                            year:   'numeric',
+                            hour:   '2-digit',
+                            minute: '2-digit',
+                          })}
                         </span>
                       )}
                     </div>
