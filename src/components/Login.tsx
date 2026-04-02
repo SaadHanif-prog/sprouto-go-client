@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Globe, Lock, ArrowRight, Sparkles, UserPlus, AlertCircle, Check, Zap, Rocket, Star, TrendingUp, Shield, CheckCircle2, Menu, X } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import Logo from './Logo';
-import PrivacyPolicy from './PrivacyPolicy';
+// import PrivacyPolicy from './PrivacyPolicy';
 import CookiesPolicy from './CookiesPolicy';
 import DataUsage from './DataUsage';
 import { Role, Plan, mockPlans } from '../types';
@@ -11,6 +11,8 @@ import type { CreateSignup } from '../types/auth.types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useLogin, useSignup } from '../hooks new/auth.hook';
 import ForgotPasswordModal from "./ForgotPassword";
+import { Link } from "react-router-dom";
+
 
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
@@ -1066,8 +1068,16 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
             <div>
               <h4 className="text-white font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li><button onClick={() => { setViewMode('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">Privacy Policy</button></li>
-                <li><button onClick={() => { setViewMode('cookies'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">Cookies Policy</button></li>
+            <li>
+                <Link to="/privacy" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-white transition-colors">
+                  Terms & Conditions
+                </Link>
+              </li>                <li><button onClick={() => { setViewMode('cookies'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">Cookies Policy</button></li>
                 <li><button onClick={() => { setViewMode('data'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors">How We Use Your Data</button></li>
               </ul>
             </div>
@@ -1079,7 +1089,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       </footer>
         </>
       )}
-      {viewMode === 'privacy' && <PrivacyPolicy onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
+      {/* {viewMode === 'privacy' && <PrivacyPolicy onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />} */}
       {viewMode === 'cookies' && <CookiesPolicy onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
       {viewMode === 'data' && <DataUsage onBack={() => { setViewMode('landing'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
         <ForgotPasswordModal

@@ -11,6 +11,41 @@ import { useGetRequests, useCreateRequestWithUpload, useAssignRequest } from "@/
 import { useGetAllUsers } from "@/src/hooks new/auth.hook";
 import { RootState } from '../global-states/store';
 
+
+function getAgeStyle(createdAt: string | Date): {
+  border: string;
+  glow: string;
+  dot: string;
+  label: string;
+} {
+  const created = new Date(createdAt).getTime();
+  const ageMs   = Date.now() - created;
+  const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+  if (ageDays < 2) {
+    return {
+      border: 'border-emerald-500/40',
+      glow:   'shadow-[0_0_12px_rgba(16,185,129,0.15)]',
+      dot:    'bg-emerald-400',
+      label:  'New',
+    };
+  }
+  if (ageDays < 4) {
+    return {
+      border: 'border-amber-500/40',
+      glow:   'shadow-[0_0_12px_rgba(245,158,11,0.15)]',
+      dot:    'bg-amber-400',
+      label:  'Aging',
+    };
+  }
+  return {
+    border: 'border-rose-500/40',
+    glow:   'shadow-[0_0_12px_rgba(239,68,68,0.15)]',
+    dot:    'bg-rose-400',
+    label:  'Overdue',
+  };
+}
+
 export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: string, sitePlan?: string }) {
 
   const selectedSiteId = useSelector(selectSelectedSiteId);
@@ -59,7 +94,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
 
   // ─── ACTIVE REQUEST LIMITS ────────────────────────────────────────────────
   const activeRequests = filteredRequests.filter((r: any) => {
-    const siteIdVal = r.siteId?._id ?? r.siteId; // ← handle populated object or plain string
+    const siteIdVal = r.siteId?._id ?? r.siteId;
     return siteIdVal === selectedSiteId && r.status !== 'completed';
   });
 
@@ -88,7 +123,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
 
   const canAddNewRequest = canAddHigh || canAddMedium || canAddLow;
 
-  // ─── DOWNLOAD HELPER (bypasses cross-origin restriction on Cloudinary URLs) ──
+  // ─── DOWNLOAD HELPER ──────────────────────────────────────────────────────
   const handleDownload = async (url: string, filename: string) => {
     try {
       const response = await fetch(url);
@@ -99,7 +134,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
       link.click();
       URL.revokeObjectURL(link.href);
     } catch {
-      window.open(url, "_blank"); // fallback: open in new tab
+      window.open(url, "_blank");
     }
   };
 
@@ -114,7 +149,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
         siteId:      selectedSiteId,
         title:       newRequest.title,
         description: newRequest.description,
-        priority:    newRequest.priority, // ← correctly typed as Priority, no cast needed
+        priority:    newRequest.priority,
       },
     });
 
@@ -305,6 +340,12 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
           filteredRequests.map((request: any, index: number) => {
             const StatusIcon = statusConfig[request.status]?.icon ?? Clock;
 
+            // ── Age-based card styling ──────────────────────────────────────
+            // Completed requests stay neutral — no urgency colouring needed.
+            const ageStyle = request.status === 'completed'
+              ? { border: 'border-white/10', glow: '', dot: 'bg-slate-500', label: '' }
+              : getAgeStyle(request.createdAt);
+
             return (
               <motion.div
                 key={request.id}
@@ -312,14 +353,36 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => setSelectedRequest(request)}
-                className="bg-[#0a0a0a]/80 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-lg hover:border-emerald-500/30 transition-colors group cursor-pointer"
+                className={`bg-[#0a0a0a]/80 backdrop-blur-xl p-6 rounded-3xl border transition-colors group cursor-pointer
+                  ${ageStyle.border} ${ageStyle.glow}
+                  hover:brightness-110`}
               >
                 <div className="flex justify-between gap-6">
                   <div className="space-y-2 min-w-0">
 
-                    <h3 className="text-lg font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                      {request.title}
-                    </h3>
+                    {/* Title row with age indicator dot */}
+                    <div className="flex items-center gap-2">
+                      {/* Pulsing dot for non-completed requests */}
+                      {request.status !== 'completed' && (
+                        <span className="relative flex h-2 w-2 shrink-0">
+                          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 ${ageStyle.dot}`} />
+                          <span className={`relative inline-flex rounded-full h-2 w-2 ${ageStyle.dot}`} />
+                        </span>
+                      )}
+                      <h3 className="text-lg font-semibold text-white group-hover:text-emerald-400 transition-colors">
+                        {request.title}
+                      </h3>
+                      {/* Age label badge */}
+                      {request.status !== 'completed' && ageStyle.label && (
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md border
+                          ${ageStyle.dot === 'bg-emerald-400' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : ''}
+                          ${ageStyle.dot === 'bg-amber-400'   ? 'text-amber-400   border-amber-500/30   bg-amber-500/10'   : ''}
+                          ${ageStyle.dot === 'bg-rose-400'    ? 'text-rose-400    border-rose-500/30    bg-rose-500/10'    : ''}
+                        `}>
+                          {ageStyle.label}
+                        </span>
+                      )}
+                    </div>
 
                     {isAdminOrSuper && (
                       <span className="text-xs text-indigo-400">
@@ -349,7 +412,7 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
                     {request.attachments.length > 0 && (
                       <div
                         className="flex flex-col gap-1"
-                        onClick={(e) => e.stopPropagation()} // prevent opening RequestDetail
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {request.attachments.map((att: any) => (
                           <button
