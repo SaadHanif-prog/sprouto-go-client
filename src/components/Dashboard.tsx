@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -17,17 +17,6 @@ import { ActivityType, ChartDataPoint, GeoMarker } from '@/src/api/stats.api';
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-// Utility to give the map markers actual positions since backend returns [0,0]
-const CITY_COORDINATES: Record<string, [number, number]> = {
-  'New York': [-74.006, 40.7128],
-  'London': [-0.1276, 51.5074],
-  'Tokyo': [139.6917, 35.6895],
-  'Sydney': [151.2093, -33.8688],
-  'San Francisco': [-122.4194, 37.7749],
-  'Paris': [2.3522, 48.8566],
-  'Berlin': [13.4050, 52.5200],
-};
-
 const FALLBACK_CHART: ChartDataPoint[] = [
   { name: 'N/A', searches: 0, clicks: 0 },
 ];
@@ -35,8 +24,24 @@ const FALLBACK_CHART: ChartDataPoint[] = [
 const ACTIVITY_STYLES: Record<ActivityType, { icon: React.ElementType; color: string; bg: string }> = {
   success: { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   info:    { icon: Activity,     color: 'text-blue-400',    bg: 'bg-blue-500/10'    },
-  purple:  { icon: Globe,         color: 'text-purple-400',  bg: 'bg-purple-500/10'  },
-  warning: { icon: Clock,         color: 'text-amber-400',   bg: 'bg-amber-500/10'   },
+  purple:  { icon: Globe,        color: 'text-purple-400',  bg: 'bg-purple-500/10'  },
+  warning: { icon: Clock,        color: 'text-amber-400',   bg: 'bg-amber-500/10'   },
+};
+
+/* ─────────────────────────────── geocoder ─────────────────────────────── */
+
+const geocodeCity = async (cityName: string): Promise<[number, number] | null> => {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const data = await res.json();
+    if (!data.length) return null;
+    return [parseFloat(data[0].lon), parseFloat(data[0].lat)];
+  } catch {
+    return null;
+  }
 };
 
 /* ──────────────────────────────── component ─────────────────────────────── */
@@ -45,9 +50,8 @@ export default function Dashboard({ site }: { site: Site }) {
   if (!site) return null;
 
   const hasUrl = !!site.url;
-  const siteId = site.id || site.id; // Ensure we have the ID for the hook
+  const siteId = site.id;
 
-  /* Real Stats Hook — passing the expected payload object */
   const {
     data: aiResponse,
     isLoading: aiLoading,
@@ -56,23 +60,49 @@ export default function Dashboard({ site }: { site: Site }) {
 
   const aiStats = aiResponse?.data;
 
-  // Process markers to ensure they have coordinates for the map
-  const processedMarkers = React.useMemo(() => {
-    if (!aiStats?.geoMarkers) return [];
-    return aiStats.geoMarkers.map(marker => ({
-      ...marker,
-      coordinates: marker.coordinates[0] === 0 
-        ? (CITY_COORDINATES[marker.name] || [0, 0]) 
-        : marker.coordinates
-    }));
+  /* ── Auto-geocoding cache ── */
+  const [geoCache, setGeoCache] = useState<Record<string, [number, number]>>({});
+
+  useEffect(() => {
+    if (!aiStats?.geoMarkers) return;
+
+    const missing = aiStats.geoMarkers.filter(
+      m => m.name?.trim() && m.coordinates[0] === 0 && !geoCache[m.name]
+    );
+
+    if (!missing.length) return;
+
+    // Stagger requests to respect Nominatim's 1 req/sec rate limit
+    missing.forEach((m, i) => {
+      setTimeout(async () => {
+        const coords = await geocodeCity(m.name);
+        if (coords) {
+          setGeoCache(prev => ({ ...prev, [m.name]: coords }));
+        }
+      }, i * 1100);
+    });
   }, [aiStats?.geoMarkers]);
 
-  const chartData  = aiStats?.chartData    ?? FALLBACK_CHART;
+  const processedMarkers = useMemo(() => {
+    if (!aiStats?.geoMarkers) return [];
+    return aiStats.geoMarkers
+      .filter(m => m.name?.trim())
+      .map(m => {
+        const coords: [number, number] | null =
+          m.coordinates[0] !== 0
+            ? m.coordinates as [number, number]
+            : geoCache[m.name] ?? null;
+        return coords ? { ...m, coordinates: coords } : null;
+      })
+      .filter((m): m is NonNullable<typeof m> => m !== null);
+  }, [aiStats?.geoMarkers, geoCache]);
+
+  const chartData  = aiStats?.chartData       ?? FALLBACK_CHART;
   const activities = aiStats?.recentActivities ?? [];
 
   const stats = [
     {
-      label: 'Total Impressions', 
+      label: 'Total Impressions',
       value: (aiStats?.totalSearches ?? 0).toLocaleString(),
       change: aiStats?.searchChange ?? '0%',
       icon: Search,
@@ -239,7 +269,7 @@ export default function Dashboard({ site }: { site: Site }) {
                     <Tooltip contentStyle={{ backgroundColor: '#141414', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} itemStyle={{ color: '#fff' }} />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px', color: '#94a3b8' }} />
                     <Area type="monotone" dataKey="searches" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorSearches)" name="Sessions" />
-                    <Area type="monotone" dataKey="clicks"   stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorClicks)"   name="Active Users"   />
+                    <Area type="monotone" dataKey="clicks"   stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorClicks)"   name="Active Users" />
                   </AreaChart>
                 </ResponsiveContainer>
               )
