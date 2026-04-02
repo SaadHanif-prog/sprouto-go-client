@@ -67,6 +67,8 @@ export const useSignup = () => {
             city: data.data.address?.city || "",
             county: data.data.address?.county || "",
             postcode: data.data.address?.postcode || "",
+            accessToken: data.data.accessToken || "",
+
           },
         }),
       );
@@ -109,6 +111,8 @@ export const useLogin = () => {
             city: data.data.address?.city || "",
             county: data.data.address?.county || "",
             postcode: data.data.address?.postcode || "",
+            accessToken: data.data.accessToken || "",
+
           },
         }),
       );

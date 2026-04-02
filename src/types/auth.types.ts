@@ -4,6 +4,7 @@ export type Role = "admin" | "client" | "superadmin" | "developer";
 
 export type Signup = {
   id: string;
+  accessToken: string;
 
   role: Role;
 
@@ -62,6 +63,7 @@ export type LoginApiResponse = {
   success: boolean;
   message: string;
   data: {
+    accessToken: string;
     id: string;
 
     firstname: string;
@@ -89,6 +91,7 @@ export type VerifyMe = {
   success: boolean;
   data: {
     id: string;
+    accessToken: string;
 
     firstname: string;
     surname: string;

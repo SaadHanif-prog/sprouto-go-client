@@ -10,15 +10,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/src/global-states/store'; 
 
 
-function getTokenFromCookie(): string | null {
-  const cookies = document.cookie.split(';');
-  for (const c of cookies) {
-    const [key, value] = c.trim().split('=');
-    if (key === 'accessToken' || key === 'token') return decodeURIComponent(value);
-  }
-  return null;
-}
-
 interface RequestDetailProps {
   key?: React.Key;
   request: any;
@@ -31,7 +22,7 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
  const { user } = useSelector((state: RootState) => state.auth);
   const { messages, sendMessage, connected, error } = useChat(
     request.id,
-    getTokenFromCookie()
+    user?.accessToken
   );
 
   const [newMessage, setNewMessage]   = useState('');

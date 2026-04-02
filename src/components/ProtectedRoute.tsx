@@ -25,6 +25,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     "dashboard",
   );
   const { user } = useSelector((state: RootState) => state.auth);
+
   const userRole = user?.role;
 
   const dispatch = useDispatch();
@@ -53,6 +54,8 @@ useEffect(() => {
           county: data.data.address?.county || "",
           postcode: data.data.address?.postcode || "",
           addonentitlementid: data.data.addonentitlementid ?? null,
+          accessToken: data.data.accessToken || "",
+
         },
       })
     );
