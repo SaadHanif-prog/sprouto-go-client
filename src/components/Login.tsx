@@ -450,7 +450,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
                         <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Email</label>
                         <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@company.com" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all" required />
                       </div>
-                    </div>d
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
