@@ -162,7 +162,8 @@ export default function App() {
             { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
 
             ...(userRole === "admin" ||
-            selectedSite?.plan?.trim().toLowerCase() !== "starter" ||
+            (selectedSite?.plan &&
+              selectedSite.plan.trim().toLowerCase() !== "starter") ||
             user?.addonentitlementid?.includes("a4")
               ? [{ id: "sproutoai", label: "SproutoAI", icon: Sparkles }]
               : []),

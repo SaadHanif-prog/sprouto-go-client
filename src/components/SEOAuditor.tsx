@@ -76,6 +76,15 @@ export default function SEOAuditor({ site }: { site: Site }) {
     );
   };
 
+// Temporary code, faking the organic traffic
+const [totalSearches, setTotalSearches] = useState<string | null>(null);
+
+useEffect(() => {
+  const value = localStorage.getItem("total searches");
+  console.log("Value in local storage", value)
+  setTotalSearches(value);
+}, []);
+
   /* ── No live URL guard ── */
   if (!site.url) {
     return (
@@ -173,7 +182,8 @@ export default function SEOAuditor({ site }: { site: Site }) {
                     <h3 className="text-slate-400 font-medium">Organic Traffic</h3>
                   </div>
                   <div className="text-3xl font-bold text-white mt-4">
-                    {report?.organicTraffic ?? '—'}k
+                    {/* {report?.organicTraffic ?? '—'}k */}
+                    {Math.floor(totalSearches as unknown as number * 2.1)} 
                   </div>
                   <p className="text-sm text-emerald-400 mt-2 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" /> visitors / month

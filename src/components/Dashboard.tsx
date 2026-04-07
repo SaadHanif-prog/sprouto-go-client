@@ -100,6 +100,17 @@ export default function Dashboard({ site }: { site: Site }) {
   const chartData  = aiStats?.chartData       ?? FALLBACK_CHART;
   const activities = aiStats?.recentActivities ?? [];
 
+
+  // Temporary code
+  useEffect(() => {
+  if (aiStats?.totalSearches !== undefined && aiStats?.totalSearches !== null) {
+    localStorage.setItem(
+      "total searches",
+      JSON.stringify(aiStats.totalSearches)
+    );
+  }
+}, [aiStats]);
+
   const stats = [
     {
       label: 'Total Impressions',
