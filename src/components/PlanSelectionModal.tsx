@@ -241,14 +241,14 @@ export default function PlanSelectionModal({
               </div>
 
               {/* Skip link */}
-              <div className="text-center mt-6">
+              {/* <div className="text-center mt-6">
                 <button
                   onClick={onClose}
                   className="text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2"
                 >
                   Skip for now, I'll add a plan later
                 </button>
-              </div>
+              </div> */}
             </div>
           </motion.div>
 
