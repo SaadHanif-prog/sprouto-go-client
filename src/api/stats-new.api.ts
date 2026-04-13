@@ -49,7 +49,7 @@ export const connectGoogle = async (): Promise<void> => {
     }
   );
 
-  const { url } = await response.json();
+  const { url } = await response.json(); 
   window.location.href = url; 
 };
 
