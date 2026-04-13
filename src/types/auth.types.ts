@@ -4,7 +4,7 @@ export type Role = "admin" | "client" | "superadmin" | "developer";
 
 export type Signup = {
   id: string;
-  accessToken: string;
+  accessToken?: string;
 
   role: Role;
 

@@ -8,14 +8,15 @@ import CookiesPolicy from './CookiesPolicy';
 import DataUsage from './DataUsage';
 import { Role, Plan, mockPlans } from '../types';
 import type { CreateSignup } from '../types/auth.types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useLogin, useSignup } from '../hooks new/auth.hook';
 import ForgotPasswordModal from "./ForgotPassword";
+import PlanSelectionModal from "./PlanSelectionModal";
 import { Link } from "react-router-dom";
 
 
 
-export default function Login({ onLogin }: { onLogin: () => void }) {
+export default function Login({ onLogin, onPlanModalChange, setActiveTab }: { onLogin: () => void, onPlanModalChange?: (isOpen: boolean) => void, setActiveTab: any;}) {
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'landing' | 'auth' | 'privacy' | 'cookies' | 'data'>('landing');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isForgotOpen, setIsForgotOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   const [title, setTitle] = useState<'Mr' | 'Mrs' | 'Ms' | 'Miss' | 'Dr' | 'Other'>('Mr');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
-  const [plans] = useLocalStorage<Plan[]>('sprouto_plans_v2', mockPlans);
+  const plans = mockPlans;
   const loginMutation = useLogin();
   const signupMutation = useSignup();
   const [signupData, setSignupData] = useState({
@@ -102,12 +103,11 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       };
 
       signupMutation.mutate(signupPayload, {
-        onSuccess: (data) => {
-          setIsLoading(false);
-          localStorage.setItem('sprouto_client_email', JSON.stringify(data.data.email));
-          window.dispatchEvent(new Event('local-storage'));
-          onLogin();
-        },
+         onSuccess: () => {
+         setIsLoading(false);
+         setIsPlanModalOpen(true);
+         onPlanModalChange?.(true); 
+          },
         onError: (error: any) => {
           setIsLoading(false);
           const message = error?.response?.data?.message || error?.message || 'Signup failed, please try again.';
@@ -118,17 +118,10 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
       return;
     }
 
-    loginMutation.mutate({ email, password }, {
-      onSuccess: (data) => {
+      loginMutation.mutate({ email, password }, {
+      onSuccess: () => {        
         setIsLoading(false);
-
-        const role = data.data.role as Role;
-        if (role === 'client') {
-          localStorage.setItem('sprouto_client_email', JSON.stringify(data.data.email));
-          window.dispatchEvent(new Event('local-storage'));
-        }
-
-        onLogin()
+        onLogin();             
       },
       onError: (error: any) => {
         setIsLoading(false);
@@ -1096,6 +1089,26 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
          isOpen={isForgotOpen}
          onClose={() => setIsForgotOpen(false)}
         />
+       <PlanSelectionModal
+        isOpen={isPlanModalOpen}
+        onClose={() => {
+          setIsPlanModalOpen(false);
+          onPlanModalChange?.(false);
+          onLogin();
+        }}
+        onGoToSites={() => {
+          setIsPlanModalOpen(false);
+          onPlanModalChange?.(false);
+          onLogin();
+          setActiveTab?.("sites"); 
+        }}
+        onGoToRequests={() => {
+          setIsPlanModalOpen(false);
+          onPlanModalChange?.(false);
+          onLogin();
+          setActiveTab?.("requests");
+        }}
+      />
     </div>
   );
 }

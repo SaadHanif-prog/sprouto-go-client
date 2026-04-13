@@ -43,36 +43,11 @@ import {
 } from "@/src/global-states/slices/authSlice";
 
 export const useSignup = () => {
-  const dispatch = useDispatch();
 
   return useMutation({
     mutationFn: (signupPayload: CreateSignup) => signup(signupPayload),
 
     onSuccess: (data: SignupApiResponse) => {
-      dispatch(
-        loginAction({
-          user: {
-            userId: data.data.id,
-
-            firstname: data.data.firstname,
-            surname: data.data.surname,
-            email: data.data.email,
-            role: data.data.role,
-
-            companyName: data.data.company?.name || "",
-            companyNumber: data.data.company?.number || "",
-
-            addressLine1: data.data.address?.line1 || "",
-
-            city: data.data.address?.city || "",
-            county: data.data.address?.county || "",
-            postcode: data.data.address?.postcode || "",
-            accessToken: data.data.accessToken || "",
-
-          },
-        }),
-      );
-
       toast.success(data.message || "Signup Successful.");
     },
 

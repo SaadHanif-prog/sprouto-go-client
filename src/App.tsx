@@ -132,12 +132,6 @@ export default function App() {
 
   const visibleSites = sites;
 
-  // Reset to valid tab whenever the logged-in role changes
-  useEffect(() => {
-    if (!userRole) return;
-    setActiveTab(defaultTabForRole(userRole));
-  }, [userRole]);
-
   const navItems =
     userRole === "superadmin"
       ? [
@@ -175,7 +169,7 @@ export default function App() {
     (allowedTabsPerRole[userRole ?? ""] ?? []).includes(tab);
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute setActiveTab={setActiveTab}>
       <div className="h-screen bg-[#050505] flex overflow-hidden font-sans text-slate-300 selection:bg-emerald-500/30">
         {/* Sidebar */}
         <motion.aside
@@ -325,7 +319,7 @@ export default function App() {
               </button>
 
               <h1 className="text-2xl font-semibold text-white tracking-tight">
-                {user?.firstname + user?.surname || user?.email || "SproutoGO"}
+                {user?.firstname + " " + user?.surname || user?.email || "SproutoGO"}
               </h1>
             </div>
 
