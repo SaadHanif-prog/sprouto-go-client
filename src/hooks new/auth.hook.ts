@@ -87,6 +87,7 @@ export const useLogin = () => {
             county: data.data.address?.county || "",
             postcode: data.data.address?.postcode || "",
             accessToken: data.data.accessToken || "",
+            isPaymentPlanActive: data.data.isPaymentPlanActive || false,
 
           },
         }),

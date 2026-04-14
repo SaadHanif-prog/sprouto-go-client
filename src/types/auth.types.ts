@@ -63,6 +63,7 @@ export type LoginApiResponse = {
   success: boolean;
   message: string;
   data: {
+    isPaymentPlanActive: boolean,
     accessToken: string;
     id: string;
 
