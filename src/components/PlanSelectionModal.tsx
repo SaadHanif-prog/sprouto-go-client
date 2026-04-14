@@ -146,7 +146,7 @@ export default function PlanSelectionModal({
                     plan.name.toLowerCase().includes("pro") || plan.popular;
                   const price =
                     billingCycle === "annually"
-                      ? Math.round(plan.price * 0.8)
+                      ? Math.round(plan.price * 12 * 0.8)
                       : plan.price;
 
                   return (
@@ -184,8 +184,7 @@ export default function PlanSelectionModal({
                             +VAT
                           </span>
                           <span className="text-slate-500 text-sm ml-1">
-                            / mo{" "}
-                            {billingCycle === "annually" && "(billed annually)"}
+                            / {billingCycle === "annually" ? "yr" : "mo"}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">
