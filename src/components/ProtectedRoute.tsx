@@ -52,7 +52,7 @@ const ProtectedRoute = ({ children, setActiveTab }: ProtectedRouteProps) => {
 }, [isSuccess, data, dispatch ]); 
 
 
-  if (!user || !user.isPaymentPlanActive) {
+  if (!user) {
     return (
       <Login
         onLogin={() => {
