@@ -1,41 +1,43 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useParams } from "react-router-dom";
 import { useResetPassword } from "@/src/hooks new/auth.hook";
 
 const ResetPassword = () => {
-const token = window.location.pathname.split("/").pop();
+  const { id } = useParams(); 
+
   const resetPasswordMutation = useResetPassword();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+    setError(null);
 
-  setError(null);
-
-  if (!token) {
-    return setError("Invalid or missing token");
-  }
-
-  if (password !== confirmPassword) {
-    return setError("Passwords do not match");
-  }
-
-  resetPasswordMutation.mutate(
-    {
-      token,
-      payload: { password },
-    },
-    {
-      onSuccess: () => {
-        window.location.href = import.meta.env.VITE_CLIENT_URL;
-      },
+    if (!id) {
+      return setError("Invalid or missing token");
     }
-  );
-};
+
+    if (password !== confirmPassword) {
+      return setError("Passwords do not match");
+    }
+
+    resetPasswordMutation.mutate(
+      {
+        token: id,
+        payload: { password },
+      },
+      {
+        onSuccess: () => {
+         window.location.href = "/";
+        },
+      }
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center px-4">
       <motion.div
@@ -46,12 +48,12 @@ const handleSubmit = (e: React.FormEvent) => {
         <h2 className="text-2xl font-bold text-white mb-2">
           Reset Password 🔐
         </h2>
+
         <p className="text-slate-400 text-sm mb-6">
           Enter your new password below
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Password */}
           <input
             type="password"
             placeholder="New Password"
@@ -61,7 +63,6 @@ const handleSubmit = (e: React.FormEvent) => {
             required
           />
 
-          {/* Confirm Password */}
           <input
             type="password"
             placeholder="Confirm Password"
@@ -71,12 +72,10 @@ const handleSubmit = (e: React.FormEvent) => {
             required
           />
 
-          {/* Local Validation Error */}
           {error && (
             <p className="text-red-400 text-sm">{error}</p>
           )}
 
-          {/* API Error */}
           {resetPasswordMutation.isError && (
             <p className="text-red-400 text-sm">
               {(resetPasswordMutation.error as any)?.response?.data?.message ||
@@ -84,7 +83,6 @@ const handleSubmit = (e: React.FormEvent) => {
             </p>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={resetPasswordMutation.isPending}

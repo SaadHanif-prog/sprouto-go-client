@@ -172,7 +172,7 @@ export const useResetPassword = () => {
     }) => resetPassword(token, payload),
 
     onSuccess: async (data: ResetPasswordResponse) => {
-      toast.success(data.message || "Password reset successful.");
+      console.error(data.message || "Password reset successful.");
 
       try {
         // 🔥 clear cookies from backend
@@ -192,7 +192,7 @@ export const useResetPassword = () => {
     },
 
     onError: (error: AxiosError<ErrorResponse>) => {
-      toast.error(error.response?.data?.message || error.message);
+      console.error(error.response?.data?.message || error.message);
     },
   });
 };

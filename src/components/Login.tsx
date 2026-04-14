@@ -28,6 +28,7 @@ import { useLogin, useSignup } from "../hooks new/auth.hook";
 import ForgotPasswordModal from "./ForgotPassword";
 import PlanSelectionModal from "./PlanSelectionModal";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function Login({
   onLogin,
@@ -71,95 +72,170 @@ export default function Login({
     postcode: "",
   });
 
-  const handleNextStep = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const validateUKPostcode = (postcode: string) => {
+  const regex = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i;
+  return regex.test(postcode.trim());
+};
 
-    if (signupStep === 1) {
-      if (password !== confirmPassword) {
-        setError("Passwords do not match");
-        return;
-      }
-      if (password.length < 4) {
-        setError("Password must be at least 8 characters");
-        return;
-      }
-      setSignupStep(2);
+const validateEmail = (email: string) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email.trim());
+};
+
+const handleNextStep = (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+
+  if (signupStep === 1) {
+    const missing: string[] = [];
+
+    if (!signupData.firstName.trim()) missing.push("First Name");
+    if (!signupData.surname.trim()) missing.push("Surname");
+    if (!email.trim()) missing.push("Email");
+    if (!password) missing.push("Password");
+    if (!confirmPassword) missing.push("Confirm Password");
+
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      return;
     }
-  };
+
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setSignupStep(2);
+  }
+};
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (isSignUp && signupStep < 2) {
-      handleNextStep(e);
+  if (!isSignUp) {
+    // Login validation
+    if (!email.trim()) {
+      toast.error("Email is required");
       return;
     }
-
-    setIsLoading(true);
-
-    if (isSignUp) {
-      const signupPayload: CreateSignup = {
-        role: "client",
-        title,
-        firstname: signupData.firstName,
-        surname: signupData.surname,
-        email,
-        password,
-        company: {
-          name: signupData.companyName,
-          number: signupData.companyNumber,
-        },
-        address: {
-          line1: signupData.addressLine1,
-          county: signupData.county,
-          city: signupData.city,
-          postcode: signupData.postcode,
-        },
-        subscription: {
-          plan: "starter",
-          billingCycle: "monthly",
-        },
-      };
-
-      signupMutation.mutate(signupPayload, {
-        onSuccess: () => {
-          setIsLoading(false);
-          setIsPlanModalOpen(true);
-        },
-        onError: (error: any) => {
-          setIsLoading(false);
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Signup failed, please try again.";
-          setError(message);
-        },
-      });
-
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address");
       return;
     }
+    if (!password) {
+      toast.error("Password is required");
+      return;
+    }
+  }
 
-    loginMutation.mutate(
-      { email, password },
-      {
-        onSuccess: () => {
-          setIsLoading(false);
-          onLogin();
-        },
-        onError: (error: any) => {
-          setIsLoading(false);
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Invalid email or password.";
-          setError(message);
-        },
+  if (isSignUp && signupStep < 2) {
+    handleNextStep(e);
+    return;
+  }
+
+  if (isSignUp && signupStep === 2) {
+    // Step 2 validation
+    if (!signupData.companyName.trim()) {
+      toast.error("Company name is required");
+      return;
+    }
+    if (!signupData.companyNumber.trim()) {
+      toast.error("Company number is required");
+      return;
+    }
+    if (!signupData.addressLine1.trim()) {
+      toast.error("Address line 1 is required");
+      return;
+    }
+    if (!signupData.city.trim()) {
+      toast.error("City / Town is required");
+      return;
+    }
+    if (!signupData.postcode.trim()) {
+      toast.error("Postcode is required");
+      return;
+    }
+    if (!validateUKPostcode(signupData.postcode)) {
+      toast.error("Please enter a valid UK postcode (e.g. SW1A 1AA)");
+      return;
+    }
+  }
+
+  setIsLoading(true);
+
+  if (isSignUp) {
+    const signupPayload: CreateSignup = {
+      role: "client",
+      title,
+      firstname: signupData.firstName,
+      surname: signupData.surname,
+      email,
+      password,
+      company: {
+        name: signupData.companyName,
+        number: signupData.companyNumber,
       },
-    );
-  };
+      address: {
+        line1: signupData.addressLine1,
+        county: signupData.county,
+        city: signupData.city,
+        postcode: signupData.postcode,
+      },
+      subscription: {
+        plan: "starter",
+        billingCycle: "monthly",
+      },
+    };
 
+    signupMutation.mutate(signupPayload, {
+      onSuccess: () => {
+        setIsLoading(false);
+        toast.success("Account created! Please select a plan to continue.");
+        setIsPlanModalOpen(true);
+      },
+      onError: (error: any) => {
+        setIsLoading(false);
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Signup failed, please try again.";
+        toast.error(message);
+        setError(message);
+      },
+    });
+
+    return;
+  }
+
+  loginMutation.mutate(
+    { email, password },
+    {
+      onSuccess: () => {
+        setIsLoading(false);
+        toast.success("Welcome back!");
+        onLogin();
+      },
+      onError: (error: any) => {
+        setIsLoading(false);
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Invalid email or password.";
+        toast.error(message);
+        setError(message);
+      },
+    },
+  );
+};
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden font-sans selection:bg-emerald-500/30">
       {/* Navbar */}
