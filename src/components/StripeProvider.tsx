@@ -5,15 +5,15 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export default function StripeProvider({ children, clientSecret }: any) {
   return (
-   <Elements
-  stripe={stripePromise}
-  options={{
-    clientSecret,
-    appearance: {
-      theme: "night", // 🔥 switch from "stripe" → "night"
-    },
-  }}
->
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        appearance: {
+          theme: "night", 
+        },
+      }}
+    >
       {children}
     </Elements>
   );

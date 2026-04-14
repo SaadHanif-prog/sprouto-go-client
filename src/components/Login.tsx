@@ -31,11 +31,9 @@ import { Link } from "react-router-dom";
 
 export default function Login({
   onLogin,
-  onPlanModalChange,
   setActiveTab,
 }: {
   onLogin: () => void;
-  onPlanModalChange?: (isOpen: boolean) => void;
   setActiveTab: any;
 }) {
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
@@ -129,7 +127,6 @@ export default function Login({
         onSuccess: () => {
           setIsLoading(false);
           setIsPlanModalOpen(true);
-          onPlanModalChange?.(true);
         },
         onError: (error: any) => {
           setIsLoading(false);
@@ -1585,18 +1582,15 @@ export default function Login({
         isOpen={isPlanModalOpen}
         onClose={() => {
           setIsPlanModalOpen(false);
-          onPlanModalChange?.(false);
           onLogin();
         }}
         onGoToSites={() => {
           setIsPlanModalOpen(false);
-          onPlanModalChange?.(false);
           onLogin();
           setActiveTab?.("sites");
         }}
         onGoToRequests={() => {
           setIsPlanModalOpen(false);
-          onPlanModalChange?.(false);
           onLogin();
           setActiveTab?.("requests");
         }}

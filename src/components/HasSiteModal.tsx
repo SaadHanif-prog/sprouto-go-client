@@ -5,10 +5,9 @@ interface HasSiteModalProps {
   isOpen: boolean;
   onYes: () => void;
   onNo: () => void;
-  onSkip: () => void;
 }
 
-export default function HasSiteModal({ isOpen, onYes, onNo, onSkip }: HasSiteModalProps) {
+export default function HasSiteModal({ isOpen, onYes, onNo }: HasSiteModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (

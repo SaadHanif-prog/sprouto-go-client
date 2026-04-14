@@ -110,6 +110,7 @@ export type VerifyMe = {
       postcode: string;
     };
     addonentitlementid?: string[] | null;
+    isPaymentPlanActive?: boolean,
 
   };
 };

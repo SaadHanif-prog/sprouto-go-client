@@ -85,14 +85,6 @@ export default function PlanSelectionModal({
             {/* Top gradient bar */}
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 to-blue-500" />
 
-            {/* Close / Skip button */}
-            <button
-              onClick={onClose}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
             <div className="p-8 overflow-y-auto max-h-[90vh]">
               {/* Header */}
               <div className="text-center mb-8">
@@ -258,7 +250,6 @@ export default function PlanSelectionModal({
                 clientSecret={clientSecret}
                 onClose={() => {
                   setClientSecret(null);
-                  queryClient.invalidateQueries({ queryKey: ["verifyMe"] });
                   setShowHasSiteModal(true);
                 }}
               />
@@ -270,11 +261,6 @@ export default function PlanSelectionModal({
             onNo={() => {
               setShowHasSiteModal(false);
               setShowNewSiteModal(true);
-            }}
-            onSkip={() => {
-              setShowHasSiteModal(false);
-              queryClient.invalidateQueries({ queryKey: ["verifyMe"] });
-              setTimeout(onClose, 100);
             }}
           />
 

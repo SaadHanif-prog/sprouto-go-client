@@ -1,8 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useVerifyMe } from "@/src/hooks new/auth.hook";
-import { setUser, logout } from "@/src/global-states/slices/authSlice";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { setUser } from "@/src/global-states/slices/authSlice";
 import Login from "./Login";
 import { RootState } from "../global-states/store";
 
@@ -21,9 +20,6 @@ export type Tab =
   | "profile";
 
 const ProtectedRoute = ({ children, setActiveTab }: ProtectedRouteProps) => {
-  const [isPendingPlan, setIsPendingPlan] = useState(false);
-  const isPendingPlanRef = useRef(false);
-
   const { user } = useSelector((state: RootState) => state.auth);
   const userRole = user?.role;
   const dispatch = useDispatch();
@@ -31,7 +27,7 @@ const ProtectedRoute = ({ children, setActiveTab }: ProtectedRouteProps) => {
   const { data, isSuccess } = useVerifyMe();
 
   useEffect(() => {
-  if (isSuccess && data?.data && !isPendingPlanRef.current) {
+  if (isSuccess && data?.data) {
     dispatch(
       setUser({
         user: {
@@ -48,31 +44,20 @@ const ProtectedRoute = ({ children, setActiveTab }: ProtectedRouteProps) => {
           postcode: data.data.address?.postcode || "",
           addonentitlementid: data.data.addonentitlementid ?? null,
           accessToken: data.data.accessToken || "",
+          isPaymentPlanActive: data.data.isPaymentPlanActive || false,
         },
       })
     );
   }
-}, [isSuccess, data, dispatch, isPendingPlan]); 
+}, [isSuccess, data, dispatch ]); 
 
-  const handlePlanModalChange = (isOpen: boolean) => {
-  isPendingPlanRef.current = isOpen;
-  setIsPendingPlan(isOpen);
-  if (isOpen) {
-    dispatch(logout());
-  } else {
-    isPendingPlanRef.current = false;
-  }
-};
 
-  if (!user || isPendingPlan) {
+  if (!user || !user.isPaymentPlanActive) {
     return (
       <Login
         onLogin={() => {
-          isPendingPlanRef.current = false;
-          setIsPendingPlan(false);
           setActiveTab(userRole === "superadmin" ? "superadmin" : "sites");
         }}
-        onPlanModalChange={handlePlanModalChange}
         setActiveTab={setActiveTab}
       />
     );

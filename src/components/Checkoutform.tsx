@@ -88,11 +88,13 @@ export default function CheckoutForm({ clientSecret, onClose }: Props) {
     setLoading(false);
   };
 
+  //For later use ..... in the below parent div
+  // onClick={!loading ? onClose : undefined}
   return (
-    <div style={overlayStyle} onClick={!loading ? onClose : undefined}>
+    <div style={overlayStyle} >
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
-        <button
+        {/* <button
           onClick={onClose}
           disabled={loading}
           style={{
@@ -108,7 +110,7 @@ export default function CheckoutForm({ clientSecret, onClose }: Props) {
           }}
         >
           ✕
-        </button>
+        </button> */}
 
         {/* Scrollable content area */}
         <div style={scrollableBodyStyle}>

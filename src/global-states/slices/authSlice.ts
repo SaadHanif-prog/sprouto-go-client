@@ -20,6 +20,8 @@ export type User = {
   county: string;
   postcode: string;
   addonentitlementid?: string[] | null;
+
+  isPaymentPlanActive?: boolean;
 };
 
 type AuthState = {
