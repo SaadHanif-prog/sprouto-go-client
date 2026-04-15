@@ -7,7 +7,7 @@ import RequestDetail from './RequestDetail';
 import { useSelector } from "react-redux";
 import { selectSelectedSiteId } from "@/src/global-states/slices/siteSlice";
 
-import { useGetRequests, useCreateRequestWithUpload, useAssignRequest } from "@/src/hooks new/requests.hook";
+import { useGetRequests, useCreateRequestWithUpload, useAssignRequest, useCompleteRequest } from "@/src/hooks new/requests.hook";
 import { useGetAllUsers } from "@/src/hooks new/auth.hook";
 import { RootState } from '../global-states/store';
 
@@ -57,6 +57,8 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
 
   const createRequestMutation = useCreateRequestWithUpload();
   const assignMutation = useAssignRequest();
+  const { mutate: completeRequest, isPending } = useCompleteRequest();
+
 
   const { data: usersData } = useGetAllUsers();
 
@@ -338,6 +340,8 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
           </div>
         ) : (
           filteredRequests.map((request: any, index: number) => {
+
+            console.log("Requests", request)
             const StatusIcon = statusConfig[request.status]?.icon ?? Clock;
 
             // ── Age-based card styling ──────────────────────────────────────
@@ -478,6 +482,29 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
                           </span>
                         )}
                       </div>
+                    )}
+ 
+                    {user?.role === "developer" && request.status !== "completed" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          completeRequest({ requestId: request._id })}}
+                        
+                        disabled={isPending}
+                        style={{
+                          marginTop: "12px",
+                          padding: "10px 20px",
+                          background: "#22c55e",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "10px",
+                          fontWeight: 600,
+                          cursor: isPending ? "not-allowed" : "pointer",
+                          opacity: isPending ? 0.7 : 1,
+                        }}
+                      >
+                        Mark as complete
+                      </button>
                     )}
                   </div>
 

@@ -69,6 +69,11 @@ export interface AssignRequestResponse {
   success: boolean;
   data:    Request;
 }
+export interface CompleteRequestResponse {
+  success: boolean;
+  data:    Request;
+}
+
 
 
 // GET REQUESTS
@@ -117,5 +122,14 @@ export const assignRequest = async (
     payload
   );
 
+  return data;
+};
+
+export const completeRequest = async (
+  requestId: string
+): Promise<CompleteRequestResponse> => {
+  const { data } = await apiClient.patch<CompleteRequestResponse>(
+    `${ENDPOINTS.requests}/${requestId}/complete`
+  );
   return data;
 };

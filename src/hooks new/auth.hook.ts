@@ -59,39 +59,35 @@ export const useSignup = () => {
 
 export const useLogin = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient(); // ✅ use the real shared instance
 
   return useMutation({
     mutationFn: (loginPayload: CreateLogin) => login(loginPayload),
 
     onSuccess: (data: LoginApiResponse) => {
-      const queryClient = new QueryClient();
-
-      queryClient.invalidateQueries({ queryKey: ["sites"] });
-
       dispatch(
         loginAction({
           user: {
             userId: data.data.id,
-
             firstname: data.data.firstname,
             surname: data.data.surname,
             email: data.data.email,
             role: data.data.role,
-
             companyName: data.data.company?.name || "",
             companyNumber: data.data.company?.number || "",
-
             addressLine1: data.data.address?.line1 || "",
-
             city: data.data.address?.city || "",
             county: data.data.address?.county || "",
             postcode: data.data.address?.postcode || "",
             accessToken: data.data.accessToken || "",
             isPaymentPlanActive: data.data.isPaymentPlanActive || false,
-
           },
-        }),
+        })
       );
+
+      // ✅ invalidate on the real client so verifyMe refetches
+      queryClient.invalidateQueries({ queryKey: ["verifyMe"] });
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
 
       toast.success(data.message || "Login Successful.");
     },

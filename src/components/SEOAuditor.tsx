@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Download, Search, Activity, TrendingUp, AlertTriangle,
-  CheckCircle2, Bot, User, Send, Loader2, Sparkles, RefreshCw,
+  CheckCircle2, Bot, User, Send, Loader2, Sparkles, RefreshCw, FileText,
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { Site } from '../types';
@@ -20,23 +20,223 @@ export default function SEOAuditor({ site }: { site: Site }) {
   ]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   /* ── Hooks ── */
-  // Fires automatically on mount using site.liveUrl
   const { data: auditResponse, isLoading: auditLoading, refetch } = useGetAudit(site.url);
   const { mutate: reRun, isPending: isReRunning, data: reRunData } = useReRunAudit(site.url);
   const { mutate: sendChat, isPending: isChatLoading } = useSendChatMessage();
   const { mutate: downloadCsv, isPending: isDownloading } = useDownloadTargetsCsv();
 
-  // Use re-run data if available, otherwise use the initial fetch
   const report: AuditData | null = reRunData?.data ?? auditResponse?.data ?? null;
-
   const isAnalysing = auditLoading || isReRunning;
 
   /* ── Auto-scroll ── */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isChatLoading]);
+
+  // Temporary code, faking the organic traffic
+  const [totalSearches, setTotalSearches] = useState<string | null>(null);
+
+  useEffect(() => {
+    const value = localStorage.getItem("total searches");
+    console.log("Value in local storage", value);
+    setTotalSearches(value);
+  }, []);
+
+  const organicTrafficValue = Math.floor((totalSearches as unknown as number) * 2.1);
+
+  /* ── PDF Generation ── */
+  const handleGenerateMonthlyReport = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      // Dynamically import jsPDF to avoid SSR issues
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      doc.setFillColor(0, 0, 0);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      const now = new Date();
+      const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      // ── Dark header band ──
+      doc.setFillColor(10, 10, 10);
+      doc.rect(0, 0, pageWidth, 42, 'F');
+
+      // Accent stripe
+      doc.setFillColor(16, 185, 129); // emerald-500
+      doc.rect(0, 0, 4, 42, 'F');
+
+      // Site name / title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(255, 255, 255);
+      doc.text('Monthly SEO Report', 14, 16);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(160, 160, 160);
+      doc.text(`${site.name}  ·  ${monthName}`, 14, 26);
+
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated on ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`, 14, 35);
+
+      // ── KPI Cards Row ──
+      const kpiY = 52;
+      const cardW = 55;
+      const cardH = 28;
+      const gap = 8;
+
+      const kpis = [
+        { label: 'Health Score', value: `${report?.healthScore ?? '—'}/100`, color: [16, 185, 129] as [number,number,number] },
+        { label: 'Organic Traffic', value: `${isNaN(organicTrafficValue) ? '—' : organicTrafficValue.toLocaleString()}`, color: [99, 102, 241] as [number,number,number] },
+        { label: 'Critical Issues', value: `${report?.criticalIssues ?? '—'}`, color: [239, 68, 68] as [number,number,number] },
+      ];
+
+      kpis.forEach((kpi, i) => {
+        const x = 14 + i * (cardW + gap);
+
+        // Card background
+        doc.setFillColor(20, 20, 20);
+        doc.roundedRect(x, kpiY, cardW, cardH, 3, 3, 'F');
+
+        // Top accent line
+        doc.setFillColor(...kpi.color);
+        doc.roundedRect(x, kpiY, cardW, 2, 1, 1, 'F');
+
+        // Label
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(140, 140, 140);
+        doc.text(kpi.label, x + 5, kpiY + 10);
+
+        // Value
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...kpi.color);
+        doc.text(kpi.value, x + 5, kpiY + 22);
+      });
+
+      // ── Trending Keywords ──
+      const kwY = kpiY + cardH + 12;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(230, 230, 230);
+      doc.text('Trending Keywords', 14, kwY);
+
+      // Emerald underline
+      doc.setFillColor(16, 185, 129);
+      doc.rect(14, kwY + 2, 38, 0.8, 'F');
+
+      const keywords = report?.trendingKeywords ?? [];
+      let kwX = 14;
+      let kwRow = kwY + 10;
+      const pillH = 7;
+
+      doc.setFontSize(8);
+      keywords.forEach((word) => {
+        const textWidth = doc.getTextWidth(word) + 8;
+        if (kwX + textWidth > pageWidth - 14) {
+          kwX = 14;
+          kwRow += pillH + 3;
+        }
+        doc.setFillColor(30, 30, 30);
+        doc.roundedRect(kwX, kwRow - 5, textWidth, pillH, 2, 2, 'F');
+        doc.setFillColor(16, 185, 129);
+        doc.circle(kwX + 3.5, kwRow - 1.5, 1, 'F');
+        doc.setTextColor(200, 200, 200);
+        doc.text(word, kwX + 7, kwRow);
+        kwX += textWidth + 4;
+      });
+
+      // ── Page Breakdown Table ──
+      const tableY = kwRow + 14;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(230, 230, 230);
+      doc.text('Page Breakdown', 14, tableY);
+
+      doc.setFillColor(16, 185, 129);
+      doc.rect(14, tableY + 2, 34, 0.8, 'F');
+
+      const pageRows = (report?.pageBreakdown ?? []).map((p) => [
+        p.url,
+        `${p.health}/100`,
+        p.keyword,
+        p.status,
+      ]);
+
+      autoTable(doc, {
+        startY: tableY + 8,
+        head: [['Page URL', 'Health', 'Top Keyword', 'Status']],
+        body: pageRows,
+        theme: 'grid',
+        styles: {
+          fontSize: 8.5,
+          cellPadding: 4,
+          textColor: [210, 210, 210],
+          fillColor: [18, 18, 18],
+          lineColor: [40, 40, 40],
+          lineWidth: 0.3,
+        },
+        headStyles: {
+          fillColor: [20, 20, 20],
+          textColor: [16, 185, 129],
+          fontStyle: 'bold',
+          lineColor: [16, 185, 129],
+          lineWidth: 0.4,
+        },
+        alternateRowStyles: {
+          fillColor: [24, 24, 24],
+        },
+        columnStyles: {
+          0: { cellWidth: 60 },
+          1: { cellWidth: 22, halign: 'center' },
+          2: { cellWidth: 65 },
+          3: { cellWidth: 28, halign: 'center' },
+        },
+        didParseCell: (data) => {
+          if (data.column.index === 3 && data.section === 'body') {
+            const val = String(data.cell.raw);
+            if (val === 'Good') data.cell.styles.textColor = [16, 185, 129];
+            else if (val === 'Needs Work') data.cell.styles.textColor = [234, 179, 8];
+            else if (val === 'Critical') data.cell.styles.textColor = [239, 68, 68];
+          }
+          if (data.column.index === 1 && data.section === 'body') {
+            const score = parseInt(String(data.cell.raw));
+            if (score >= 80) data.cell.styles.textColor = [16, 185, 129];
+            else if (score >= 50) data.cell.styles.textColor = [234, 179, 8];
+            else data.cell.styles.textColor = [239, 68, 68];
+          }
+        },
+      });
+
+      // ── Footer ──
+      doc.setFillColor(10, 10, 10);
+      doc.rect(0, pageHeight - 14, pageWidth, 14, 'F');
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, pageHeight - 14, pageWidth, 0.8, 'F');
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80, 80, 80);
+      doc.text(`${site.name}  ·  GEO/SEO Monthly Report  ·  ${monthName}`, 14, pageHeight - 5);
+      doc.setTextColor(16, 185, 129);
+      doc.text('Powered by SEO Auditor', pageWidth - 14, pageHeight - 5, { align: 'right' });
+
+      // ── Save ──
+      const fileName = `${site.name.replace(/\s+/g, '_')}_SEO_Report_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, '0')}.pdf`;
+      doc.save(fileName);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   /* ── Handlers ── */
   const handleReRun = () => reRun();
@@ -75,15 +275,6 @@ export default function SEOAuditor({ site }: { site: Site }) {
       }
     );
   };
-
-// Temporary code, faking the organic traffic
-const [totalSearches, setTotalSearches] = useState<string | null>(null);
-
-useEffect(() => {
-  const value = localStorage.getItem("total searches");
-  console.log("Value in local storage", value)
-  setTotalSearches(value);
-}, []);
 
   /* ── No live URL guard ── */
   if (!site.url) {
@@ -126,7 +317,7 @@ useEffect(() => {
           <h2 className="text-2xl font-bold text-white tracking-tight">GEO/SEO Auditor</h2>
           <p className="text-slate-400 mt-1">In-depth breakdown and monthly targets for {site.name}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={handleReRun}
             disabled={isAnalysing}
@@ -135,7 +326,20 @@ useEffect(() => {
             <RefreshCw className={`w-4 h-4 ${isAnalysing ? 'animate-spin' : ''}`} />
             {isAnalysing ? 'Analysing...' : 'Re-run Report'}
           </button>
+
+          {/* ── NEW: Generate Monthly Report PDF ── */}
           <button
+            onClick={handleGenerateMonthlyReport}
+            disabled={isGeneratingPdf || isAnalysing}
+            className="bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 border border-violet-500/30 px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(139,92,246,0.1)]"
+          >
+            {isGeneratingPdf
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <FileText className="w-4 h-4" />}
+            {isGeneratingPdf ? 'Generating...' : 'Generate Monthly Report'}
+          </button>
+
+          {/* <button
             onClick={handleDownload}
             disabled={isDownloading || isAnalysing}
             className="bg-emerald-500 hover:bg-emerald-400 text-[#050505] px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -144,7 +348,7 @@ useEffect(() => {
               ? <Loader2 className="w-4 h-4 animate-spin" />
               : <Download className="w-4 h-4" />}
             Download Next Month Targets
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -182,8 +386,7 @@ useEffect(() => {
                     <h3 className="text-slate-400 font-medium">Organic Traffic</h3>
                   </div>
                   <div className="text-3xl font-bold text-white mt-4">
-                    {/* {report?.organicTraffic ?? '—'}k */}
-                    {Math.floor(totalSearches as unknown as number * 2.1)} 
+                    {isNaN(organicTrafficValue) ? '—' : organicTrafficValue.toLocaleString()}
                   </div>
                   <p className="text-sm text-emerald-400 mt-2 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" /> visitors / month

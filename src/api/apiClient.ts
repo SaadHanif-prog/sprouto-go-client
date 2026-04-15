@@ -26,7 +26,7 @@ apiClient.interceptors.response.use(
         await apiClient.post("/auth/refresh-access-token");
         return apiClient(originalRequest);
       } catch (refreshError: any) {
-        // window.location.href = "/login";
+        // window.location.href = "/";
 
         // Just reject → let app handle it
         return Promise.reject(refreshError);

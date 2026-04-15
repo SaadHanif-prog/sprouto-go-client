@@ -6,7 +6,8 @@ import {
   createRequest,
   getRequests,
   assignRequest,
-} from "../api/request.api"; // ← uploadFile removed
+  completeRequest
+} from "../api/request.api";
 
 /* ================= GET REQUESTS ================= */
 
@@ -74,6 +75,28 @@ export const useAssignRequest = () => {
     onError: (error: AxiosError<any>) => {
       toast.error(
         error.response?.data?.message || "Failed to assign request"
+      );
+    },
+  });
+};
+
+/* ================= COMPLETE REQUEST ================= */
+
+export const useCompleteRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ requestId }: { requestId: string }) =>
+      completeRequest(requestId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+      toast.success("Task marked as completed");
+    },
+
+    onError: (error: AxiosError<any>) => {
+      toast.error(
+        error.response?.data?.message || "Failed to complete request"
       );
     },
   });

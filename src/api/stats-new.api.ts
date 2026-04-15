@@ -42,7 +42,9 @@ export interface AiStatsResponse {
 // ================= CONNECT GOOGLE =================
 export const connectGoogle = async (): Promise<void> => {
   const response = await fetch(
-    "https://sprouto-go-server.onrender.com/api/v1/google/connect-google",
+    import.meta.env.VITE_ENV === "development"
+      ? "http://localhost:5000/api/v1/google/connect-google"
+      : "https://sprouto-go-server.onrender.com/api/v1/google/connect-google",
     {
       method: "GET",
       credentials: "include", 

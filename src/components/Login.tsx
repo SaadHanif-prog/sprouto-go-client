@@ -72,6 +72,23 @@ export default function Login({
     postcode: "",
   });
 
+  const countries = [
+  "United Kingdom",
+  "United States",
+  "Pakistan",
+  "India",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "Italy",
+  "Spain",
+  "Netherlands",
+  "UAE",
+  "Saudi Arabia",
+  "Turkey",
+];
+
   const validateUKPostcode = (postcode: string) => {
   const regex = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i;
   return regex.test(postcode.trim());
@@ -208,7 +225,6 @@ const handleNextStep = (e: React.FormEvent) => {
           error?.response?.data?.message ||
           error?.message ||
           "Signup failed, please try again.";
-        toast.error(message);
         setError(message);
       },
     });
@@ -230,7 +246,6 @@ const handleNextStep = (e: React.FormEvent) => {
           error?.response?.data?.message ||
           error?.message ||
           "Invalid email or password.";
-        toast.error(message);
         setError(message);
       },
     },
@@ -776,24 +791,38 @@ const handleNextStep = (e: React.FormEvent) => {
                                 />
                               </div>
                               <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
-                                    County
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={signupData.county}
-                                    onChange={(e) =>
-                                      setSignupData({
-                                        ...signupData,
-                                        county: e.target.value,
-                                      })
-                                    }
-                                    placeholder="Greater London"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
-                                  />
-                                </div>
-                                <div className="space-y-1">
+                               <div className="space-y-1">
+                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
+                                  Country
+                                </label>
+
+                                <select
+                                  value={signupData.county}
+                                  onChange={(e) =>
+                                    setSignupData({
+                                      ...signupData,
+                                      county: e.target.value,
+                                    })
+                                  }
+                                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all appearance-none"
+                                  required
+                                >
+                                  <option value="" className="bg-[#141414]">
+                                    Select Country
+                                  </option>
+
+                                  {countries.map((country) => (
+                                    <option
+                                      key={country}
+                                      value={country}
+                                      className="bg-[#141414]"
+                                    >
+                                      {country}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                               <div className="space-y-1">
                                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
                                     City / Town
                                   </label>
