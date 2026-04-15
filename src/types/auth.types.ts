@@ -35,6 +35,8 @@ export type Signup = {
 
   createdAt: string;
   updatedAt: string;
+
+  acceptTerms?: boolean;
 };
 
 // ❗ FIXED: remove wrong "userId"

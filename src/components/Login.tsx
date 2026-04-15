@@ -70,187 +70,193 @@ export default function Login({
     county: "",
     city: "",
     postcode: "",
+    acceptTerms: false,
   });
 
   const countries = [
-  "United Kingdom",
-  "United States",
-  "Pakistan",
-  "India",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "Italy",
-  "Spain",
-  "Netherlands",
-  "UAE",
-  "Saudi Arabia",
-  "Turkey",
-];
+    "United Kingdom",
+    "United States",
+    "Pakistan",
+    "India",
+    "Canada",
+    "Australia",
+    "Germany",
+    "France",
+    "Italy",
+    "Spain",
+    "Netherlands",
+    "UAE",
+    "Saudi Arabia",
+    "Turkey",
+  ];
 
   const validateUKPostcode = (postcode: string) => {
-  const regex = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i;
-  return regex.test(postcode.trim());
-};
+    const regex = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$/i;
+    return regex.test(postcode.trim());
+  };
 
-const validateEmail = (email: string) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email.trim());
-};
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email.trim());
+  };
 
-const handleNextStep = (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
+  const handleNextStep = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-  if (signupStep === 1) {
-    const missing: string[] = [];
+    if (signupStep === 1) {
+      const missing: string[] = [];
 
-    if (!signupData.firstName.trim()) missing.push("First Name");
-    if (!signupData.surname.trim()) missing.push("Surname");
-    if (!email.trim()) missing.push("Email");
-    if (!password) missing.push("Password");
-    if (!confirmPassword) missing.push("Confirm Password");
+      if (!signupData.firstName.trim()) missing.push("First Name");
+      if (!signupData.surname.trim()) missing.push("Surname");
+      if (!email.trim()) missing.push("Email");
+      if (!password) missing.push("Password");
+      if (!confirmPassword) missing.push("Confirm Password");
 
-    if (missing.length > 0) {
-      toast.error(`Please fill in: ${missing.join(", ")}`);
-      return;
+      if (missing.length > 0) {
+        toast.error(`Please fill in: ${missing.join(", ")}`);
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+      if (password.length < 8) {
+        toast.error("Password must be at least 8 characters");
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+
+      setSignupStep(2);
     }
-
-    if (!validateEmail(email)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    setSignupStep(2);
-  }
-};
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (!isSignUp) {
-    // Login validation
-    if (!email.trim()) {
-      toast.error("Email is required");
-      return;
+    if (!isSignUp) {
+      // Login validation
+      if (!email.trim()) {
+        toast.error("Email is required");
+        return;
+      }
+      if (!validateEmail(email)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+      if (!password) {
+        toast.error("Password is required");
+        return;
+      }
     }
-    if (!validateEmail(email)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-    if (!password) {
-      toast.error("Password is required");
-      return;
-    }
-  }
 
-  if (isSignUp && signupStep < 2) {
-    handleNextStep(e);
-    return;
-  }
+    if (isSignUp && signupStep < 2) {
+      handleNextStep(e);
+      return;
+    }
 
-  if (isSignUp && signupStep === 2) {
-    // Step 2 validation
-    if (!signupData.companyName.trim()) {
-      toast.error("Company name is required");
-      return;
+    if (isSignUp && signupStep === 2) {
+      // Step 2 validation
+      if (!signupData.companyName.trim()) {
+        toast.error("Company name is required");
+        return;
+      }
+      if (!signupData.companyNumber.trim()) {
+        toast.error("Company number is required");
+        return;
+      }
+      if (!signupData.addressLine1.trim()) {
+        toast.error("Address line 1 is required");
+        return;
+      }
+      if (!signupData.city.trim()) {
+        toast.error("City / Town is required");
+        return;
+      }
+      if (!signupData.postcode.trim()) {
+        toast.error("Postcode is required");
+        return;
+      }
+      if (!validateUKPostcode(signupData.postcode)) {
+        toast.error("Please enter a valid UK postcode (e.g. SW1A 1AA)");
+        return;
+      }
+      if (!signupData.acceptTerms) {
+        toast.error("Please accept Terms & Conditions");
+        return;
+      }
     }
-    if (!signupData.companyNumber.trim()) {
-      toast.error("Company number is required");
-      return;
-    }
-    if (!signupData.addressLine1.trim()) {
-      toast.error("Address line 1 is required");
-      return;
-    }
-    if (!signupData.city.trim()) {
-      toast.error("City / Town is required");
-      return;
-    }
-    if (!signupData.postcode.trim()) {
-      toast.error("Postcode is required");
-      return;
-    }
-    if (!validateUKPostcode(signupData.postcode)) {
-      toast.error("Please enter a valid UK postcode (e.g. SW1A 1AA)");
-      return;
-    }
-  }
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  if (isSignUp) {
-    const signupPayload: CreateSignup = {
-      role: "client",
-      title,
-      firstname: signupData.firstName,
-      surname: signupData.surname,
-      email,
-      password,
-      company: {
-        name: signupData.companyName,
-        number: signupData.companyNumber,
+    if (isSignUp) {
+      const signupPayload: CreateSignup = {
+        role: "client",
+        title,
+        firstname: signupData.firstName,
+        surname: signupData.surname,
+        email,
+        password,
+        company: {
+          name: signupData.companyName,
+          number: signupData.companyNumber,
+        },
+        address: {
+          line1: signupData.addressLine1,
+          county: signupData.county,
+          city: signupData.city,
+          postcode: signupData.postcode,
+        },
+        subscription: {
+          plan: "starter",
+          billingCycle: "monthly",
+        },
+        acceptTerms: signupData.acceptTerms
+      };
+
+      signupMutation.mutate(signupPayload, {
+        onSuccess: () => {
+          setIsLoading(false);
+          toast.success("Account created! Please select a plan to continue.");
+          setIsPlanModalOpen(true);
+        },
+        onError: (error: any) => {
+          setIsLoading(false);
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Signup failed, please try again.";
+          setError(message);
+        },
+      });
+
+      return;
+    }
+
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          toast.success("Welcome back!");
+          onLogin();
+        },
+        onError: (error: any) => {
+          setIsLoading(false);
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Invalid email or password.";
+          setError(message);
+        },
       },
-      address: {
-        line1: signupData.addressLine1,
-        county: signupData.county,
-        city: signupData.city,
-        postcode: signupData.postcode,
-      },
-      subscription: {
-        plan: "starter",
-        billingCycle: "monthly",
-      },
-    };
-
-    signupMutation.mutate(signupPayload, {
-      onSuccess: () => {
-        setIsLoading(false);
-        toast.success("Account created! Please select a plan to continue.");
-        setIsPlanModalOpen(true);
-      },
-      onError: (error: any) => {
-        setIsLoading(false);
-        const message =
-          error?.response?.data?.message ||
-          error?.message ||
-          "Signup failed, please try again.";
-        setError(message);
-      },
-    });
-
-    return;
-  }
-
-  loginMutation.mutate(
-    { email, password },
-    {
-      onSuccess: () => {
-        setIsLoading(false);
-        toast.success("Welcome back!");
-        onLogin();
-      },
-      onError: (error: any) => {
-        setIsLoading(false);
-        const message =
-          error?.response?.data?.message ||
-          error?.message ||
-          "Invalid email or password.";
-        setError(message);
-      },
-    },
-  );
-};
+    );
+  };
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden font-sans selection:bg-emerald-500/30">
       {/* Navbar */}
@@ -791,38 +797,38 @@ const handleNextStep = (e: React.FormEvent) => {
                                 />
                               </div>
                               <div className="grid grid-cols-2 gap-4">
-                               <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
-                                  Country
-                                </label>
+                                <div className="space-y-1">
+                                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
+                                    Country
+                                  </label>
 
-                                <select
-                                  value={signupData.county}
-                                  onChange={(e) =>
-                                    setSignupData({
-                                      ...signupData,
-                                      county: e.target.value,
-                                    })
-                                  }
-                                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all appearance-none"
-                                  required
-                                >
-                                  <option value="" className="bg-[#141414]">
-                                    Select Country
-                                  </option>
-
-                                  {countries.map((country) => (
-                                    <option
-                                      key={country}
-                                      value={country}
-                                      className="bg-[#141414]"
-                                    >
-                                      {country}
+                                  <select
+                                    value={signupData.county}
+                                    onChange={(e) =>
+                                      setSignupData({
+                                        ...signupData,
+                                        county: e.target.value,
+                                      })
+                                    }
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all appearance-none"
+                                    required
+                                  >
+                                    <option value="" className="bg-[#141414]">
+                                      Select Country
                                     </option>
-                                  ))}
-                                </select>
-                              </div>
-                               <div className="space-y-1">
+
+                                    {countries.map((country) => (
+                                      <option
+                                        key={country}
+                                        value={country}
+                                        className="bg-[#141414]"
+                                      >
+                                        {country}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="space-y-1">
                                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
                                     City / Town
                                   </label>
@@ -858,6 +864,44 @@ const handleNextStep = (e: React.FormEvent) => {
                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all"
                                   required
                                 />
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <input
+                                  id="terms"
+                                  type="checkbox"
+                                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  onChange={(e) =>
+                                    setSignupData({
+                                      ...signupData,
+                                      acceptTerms: e.target.checked,
+                                    })
+                                  }
+                                />
+
+                                <label
+                                  htmlFor="terms"
+                                  className="text-sm text-gray-700 leading-5 cursor-pointer"
+                                >
+                                  I have read and agree to the{" "}
+                                  <a
+                                    href={`${import.meta.env.VITE_CLIENT_URL}/terms`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline font-medium"
+                                  >
+                                    Terms & Conditions
+                                  </a>{" "}
+                                  and{" "}
+                                  <a
+                                    href={`${import.meta.env.VITE_CLIENT_URL}/privacy`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline font-medium"
+                                  >
+                                    Privacy Policy
+                                  </a>
+                                  .
+                                </label>
                               </div>
                             </div>
                           </motion.div>
