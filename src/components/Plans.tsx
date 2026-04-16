@@ -8,7 +8,7 @@ import {
   ArrowRight,
   Plus,
   Sparkles,
-  Mail
+  Mail,
 } from "lucide-react";
 import { Plan, Addon, mockPlans, mockAddons } from "../types";
 import CheckoutForm from "./Checkoutform";
@@ -20,7 +20,7 @@ const iconMap: Record<string, any> = {
   Shield,
   Zap,
   Sparkles,
-  Mail
+  Mail,
 };
 
 export default function Plans({ siteId }: { siteId: string }) {
@@ -31,6 +31,8 @@ export default function Plans({ siteId }: { siteId: string }) {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState("");
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
@@ -44,8 +46,8 @@ export default function Plans({ siteId }: { siteId: string }) {
         : "/subscription/create";
 
       const payload = isAddon
-        ? { addonId: item.id, billingCycle }
-        : { planId: item.id, billingCycle };
+        ? { addonId: item.id, billingCycle, promoCode: appliedPromo }
+        : { planId: item.id, billingCycle, promoCode: appliedPromo };
 
       const { data } = await apiClient.post(endpoint, payload);
 
@@ -109,6 +111,46 @@ export default function Plans({ siteId }: { siteId: string }) {
             </span>
           </span>
         </div>
+        <div className="mx-auto mb-6 flex flex-col gap-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Enter promo code"
+              value={appliedPromo || promoCode}
+              disabled={!!appliedPromo}
+              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+              className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 outline-none disabled:opacity-60"
+            />
+
+            {!appliedPromo ? (
+              <button
+                type="button"
+                onClick={() => setAppliedPromo(promoCode.trim())}
+                disabled={!promoCode.trim()}
+                className="px-4 py-2 rounded-xl bg-emerald-500 text-black font-semibold disabled:opacity-50"
+              >
+                Add
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setAppliedPromo("");
+                  setPromoCode("");
+                }}
+                className="px-4 py-2 rounded-xl bg-white/10 text-white"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+
+          {appliedPromo && (
+            <p className="text-emerald-400 text-sm mt-2">
+              Promo code applied: {appliedPromo}
+            </p>
+          )}
+        </div>
       </div>
 
       <div>
@@ -118,7 +160,7 @@ export default function Plans({ siteId }: { siteId: string }) {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {addons.map((addon, i) => {
-            if(addon.id === "a4" && billingCycle === "annually") return;
+            if (addon.id === "a4" && billingCycle === "annually") return;
             const Icon = iconMap[addon.icon] || Plus;
             return (
               <motion.div
@@ -135,6 +177,7 @@ export default function Plans({ siteId }: { siteId: string }) {
                 <h4 className="text-lg font-semibold text-white mb-2">
                   {addon.name}
                 </h4>
+
                 <p className="text-sm text-slate-400 mb-6 h-10">{addon.desc}</p>
                 <div className="flex items-center justify-between border-t border-white/5 pt-4">
                   <div className="flex flex-col">
@@ -193,6 +236,7 @@ export default function Plans({ siteId }: { siteId: string }) {
                   Most Popular
                 </div>
               )}
+
               <h4 className="text-2xl font-bold text-white mb-2">{pkg.name}</h4>
               <div className="mb-8">
                 <div className="flex items-baseline gap-1.5">
