@@ -129,6 +129,14 @@ export const mockAddons: Addon[] = [
     desc: "Priority support, AI assistance, and quick issue resolution.",
     icon: "Sparkles",
   },
+   {
+  id: "a5",
+  name: "Email Box",
+  price: 9.99,
+  currency: "GBP",
+  desc: "Professional email inbox with secure storage, smart organization, and easy access anywhere.",
+  icon: "Mail",
+},
 ];
 export const mockClients: Client[] = [
   {

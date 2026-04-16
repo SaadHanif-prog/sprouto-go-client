@@ -13,6 +13,7 @@ import {
   Plus,
   Menu,
   Sparkles,
+  ReceiptText
 } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -39,6 +40,7 @@ import SEOAuditor from "./components/SEOAuditor";
 import SproutoAI from "./components/SproutoAI";
 import Profile from "./components/Profile";
 import Sites from "./components/Sites";
+import Invoices from "./components/Invoices";
 
 import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -55,7 +57,9 @@ export type Tab =
   | "plans"
   | "superadmin"
   | "profile"
-  | "sites";
+  | "sites"
+  | "invoices";
+
 
 const defaultTabForRole = (role?: string): Tab => {
   if (role === "developer") return "requests";
@@ -73,6 +77,7 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "plans",
     "sites",
     "profile",
+    "invoices"
   ],
   developer: ["requests", "profile"],
   admin: [
@@ -83,6 +88,7 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "plans",
     "sites",
     "profile",
+    "invoices"
   ],
   client: [
     "dashboard",
@@ -92,6 +98,7 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "plans",
     "sites",
     "profile",
+    "invoices"
   ],
 };
 
@@ -137,6 +144,8 @@ export default function App() {
           { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
           { id: "sproutoai", label: "SproutoAI", icon: Sparkles },
           { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+          { id: "invoices", label: "Invoices", icon: ReceiptText },
+
         ]
       : userRole === "developer"
         ? [{ id: "requests", label: "Assigned Requests", icon: Settings }]
@@ -158,6 +167,7 @@ export default function App() {
               : []),
 
             { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
+            { id: "invoices", label: "Invoices", icon: ReceiptText },
           ];
 
   const isAllowed = (tab: Tab) =>
@@ -350,7 +360,7 @@ export default function App() {
                 {activeTab === "auditor" && isAllowed("auditor") && (
                   <SEOAuditor site={selectedSite} />
                 )}
-                {activeTab === "sproutoai" && <SproutoAI site={selectedSite} />}
+                {activeTab === "sproutoai" && isAllowed("sproutoai") && <SproutoAI site={selectedSite} />}
 
                 {activeTab === "plans" && isAllowed("plans") && (
                   <Plans siteId={selectedSiteId} />
@@ -361,6 +371,9 @@ export default function App() {
                 )}
                 {activeTab === "superadmin" && isAllowed("superadmin") && (
                   <SuperAdmin />
+                )}
+                 {activeTab === "invoices" && isAllowed("invoices") && (
+                  <Invoices />
                 )}
               </motion.div>
             </AnimatePresence>

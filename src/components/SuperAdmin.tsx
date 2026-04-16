@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { useState } from "react";
+import apiClient from "../api/apiClient";
+import { motion } from "motion/react";
 import {
   Users,
   Package,
@@ -8,12 +9,19 @@ import {
   Save,
   Sparkles,
   Globe,
-} from 'lucide-react';
-import { Plan, Addon, Client, mockPlans, mockAddons, mockClients } from '../types';
-import { Site } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { useGetAllUsers } from '../hooks new/auth.hook';
-import { useGetAllSites, useUpdateSiteSettings } from '../hooks new/sites.hook';
+} from "lucide-react";
+import {
+  Plan,
+  Addon,
+  Client,
+  mockPlans,
+  mockAddons,
+  mockClients,
+} from "../types";
+import { Site } from "../types";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useGetAllUsers } from "../hooks new/auth.hook";
+import { useGetAllSites, useUpdateSiteSettings } from "../hooks new/sites.hook";
 
 interface SuperAdminProps {
   sites: Site[];
@@ -21,16 +29,15 @@ interface SuperAdminProps {
 
 function SiteCard({ site }: { site: Site }) {
   const { mutate: updateSettings, isPending } = useUpdateSiteSettings();
-  const [liveUrl, setLiveUrl] = useState(site.liveUrl || '');
-  const [propertyId, setPropertyId] = useState(site.propertyId || '');
+  const [liveUrl, setLiveUrl] = useState(site.liveUrl || "");
+  const [propertyId, setPropertyId] = useState(site.propertyId || "");
 
   const handleSave = () => {
     updateSettings({ siteId: site.id, payload: { liveUrl, propertyId } });
   };
 
   const isDirty =
-    liveUrl !== (site.liveUrl || '') ||
-    propertyId !== (site.propertyId || '');
+    liveUrl !== (site.liveUrl || "") || propertyId !== (site.propertyId || "");
 
   return (
     <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 space-y-4">
@@ -92,7 +99,7 @@ function SiteCard({ site }: { site: Site }) {
           className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-[#050505] font-medium rounded-lg transition-colors text-sm"
         >
           <Save className="w-4 h-4" />
-          {isPending ? 'Saving...' : 'Save Changes'}
+          {isPending ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>
@@ -100,30 +107,39 @@ function SiteCard({ site }: { site: Site }) {
 }
 
 export default function SuperAdmin() {
-  const { data: usersData } = useGetAllUsers();
+  const { data: usersData, refetch } = useGetAllUsers();
 
   const [activeTab, setActiveTab] = useLocalStorage<
-    'clients' | 'plans' | 'sites'
-  >('sprouto_admin_tab', 'clients');
+    "clients" | "plans" | "sites"
+  >("sprouto_admin_tab", "clients");
 
   const [plans, setPlans] = useLocalStorage<Plan[]>(
-    'sprouto_plans_v2',
-    mockPlans
+    "sprouto_plans_v2",
+    mockPlans,
   );
 
   const [addons, setAddons] = useLocalStorage<Addon[]>(
-    'sprouto_addons',
-    mockAddons
+    "sprouto_addons",
+    mockAddons,
   );
 
   const [clients, setClients] = useLocalStorage<Client[]>(
-    'sprouto_clients',
-    mockClients
+    "sprouto_clients",
+    mockClients,
   );
 
   const [isSaving, setIsSaving] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState<string | null>(null);
 
-  const { data: allSitesData, isLoading: sitesLoading } = useGetAllSites();
+  const [cancelModal, setCancelModal] = useState<{
+    open: boolean;
+    subscriptionId: string | null;
+  }>({
+    open: false,
+    subscriptionId: null,
+  });
+
+  const { data: allSitesData } = useGetAllSites();
   const allSites = allSitesData?.data ?? [];
 
   const handleSavePlans = async () => {
@@ -138,13 +154,13 @@ export default function SuperAdmin() {
     setPlans([
       ...plans,
       {
-        id: 'p' + Date.now(),
-        name: 'New Plan',
+        id: "p" + Date.now(),
+        name: "New Plan",
         price: 0,
-        currency: 'GBP',
-        features: ['Feature 1'],
-        webhookUrl: '',
-        secretKey: '',
+        currency: "GBP",
+        features: ["Feature 1"],
+        webhookUrl: "",
+        secretKey: "",
       },
     ]);
   };
@@ -154,34 +170,148 @@ export default function SuperAdmin() {
   };
 
   const updatePlan = (id: string, field: keyof Plan, value: any) => {
-    setPlans(
-      plans.map((p) =>
-        p.id === id ? { ...p, [field]: value } : p
-      )
-    );
+    setPlans(plans.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
   };
 
   const getPlans = (entitlements: any[] = []) => {
-    if (!entitlements.length) return '-';
-    return entitlements.map((item) => item.plan).join(', ');
+    if (!entitlements.length) return "-";
+
+    return (
+      <div className="space-y-2">
+        {entitlements.map((item) => (
+          <div
+            key={item.stripeSubscriptionId}
+            className="flex items-center justify-between gap-3 bg-white/5 px-3 py-2 rounded-lg"
+          >
+            <div className="min-w-0">
+              <p className="capitalize text-emerald-400 font-medium">
+                {item.plan}
+              </p>
+
+              {item.expiresAt && (
+                <p className="text-[11px] text-slate-500">
+                  Ends: {new Date(item.expiresAt).toLocaleDateString()}
+                </p>
+              )}
+
+              {item.cancelAtPeriodEnd && (
+                <p className="text-[11px] text-yellow-400">
+                  Status: Cancelling
+                </p>
+              )}
+            </div>
+
+            {item.cancelAtPeriodEnd ? (
+              <span className="px-3 py-1 text-xs rounded-lg bg-yellow-500/15 text-yellow-400">
+                Cancelling
+              </span>
+            ) : (
+              <button
+                disabled={cancelLoading === item.stripeSubscriptionId}
+                onClick={() =>
+                  setCancelModal({
+                    open: true,
+                    subscriptionId: item.stripeSubscriptionId,
+                  })
+                }
+                className="px-3 py-1 text-xs rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 disabled:opacity-50"
+              >
+                {cancelLoading === item.stripeSubscriptionId
+                  ? "Cancelling..."
+                  : "Cancel"}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const getAddons = (addonEntitlements: any[] = []) => {
-    if (!addonEntitlements.length) return '-';
-    return addonEntitlements
-      .map((item) => item.name || item.plan || 'Addon')
-      .join(', ');
+    if (!addonEntitlements.length) return "-";
+
+    return (
+      <div className="space-y-2">
+        {addonEntitlements.map((item) => (
+          <div
+            key={item.stripeSubscriptionId}
+            className="flex items-center justify-between gap-3 bg-white/5 px-3 py-2 rounded-lg"
+          >
+            <div className="min-w-0">
+              <p className="text-blue-400 font-medium">{item.addonId}</p>
+
+              {item.expiresAt && (
+                <p className="text-[11px] text-slate-500">
+                  Ends: {new Date(item.expiresAt).toLocaleDateString()}
+                </p>
+              )}
+
+              {item.cancelAtPeriodEnd && (
+                <p className="text-[11px] text-yellow-400">
+                  Status: Cancelling
+                </p>
+              )}
+            </div>
+
+            {item.cancelAtPeriodEnd ? (
+              <span className="px-3 py-1 text-xs rounded-lg bg-yellow-500/15 text-yellow-400">
+                Cancelling
+              </span>
+            ) : (
+              <button
+                disabled={cancelLoading === item.stripeSubscriptionId}
+                onClick={() =>
+                  setCancelModal({
+                    open: true,
+                    subscriptionId: item.stripeSubscriptionId,
+                  })
+                }
+                className="px-3 py-1 text-xs rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 disabled:opacity-50"
+              >
+                {cancelLoading === item.stripeSubscriptionId
+                  ? "Cancelling..."
+                  : "Cancel"}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const handleCancel = async () => {
+    if (!cancelModal.subscriptionId) return;
+
+    try {
+      setCancelLoading(cancelModal.subscriptionId);
+
+      await apiClient.post("/subscription/cancel", {
+        subscriptionId: cancelModal.subscriptionId,
+      });
+
+      await refetch?.();
+
+      setCancelModal({
+        open: false,
+        subscriptionId: null,
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Failed to cancel subscription");
+    } finally {
+      setCancelLoading(null);
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 border-b border-white/10 pb-4">
         <button
-          onClick={() => setActiveTab('clients')}
+          onClick={() => setActiveTab("clients")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-            activeTab === 'clients'
-              ? 'bg-emerald-500/20 text-emerald-400'
-              : 'text-slate-400 hover:text-white'
+            activeTab === "clients"
+              ? "bg-emerald-500/20 text-emerald-400"
+              : "text-slate-400 hover:text-white"
           }`}
         >
           <Users className="w-4 h-4" /> Clients
@@ -199,11 +329,11 @@ export default function SuperAdmin() {
         </button> */}
 
         <button
-          onClick={() => setActiveTab('sites')}
+          onClick={() => setActiveTab("sites")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-            activeTab === 'sites'
-              ? 'bg-emerald-500/20 text-emerald-400'
-              : 'text-slate-400 hover:text-white'
+            activeTab === "sites"
+              ? "bg-emerald-500/20 text-emerald-400"
+              : "text-slate-400 hover:text-white"
           }`}
         >
           <Globe className="w-4 h-4" /> Sites & Previews
@@ -211,13 +341,14 @@ export default function SuperAdmin() {
       </div>
 
       {/* CLIENTS TAB */}
-      {activeTab === 'clients' && (
+      {activeTab === "clients" && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden"
+          className="bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-x-auto"
         >
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[1100px] text-left text-sm">
+            {" "}
             <thead className="bg-white/5 border-b border-white/10 text-slate-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Client Name</th>
@@ -228,35 +359,32 @@ export default function SuperAdmin() {
                 <th className="px-6 py-4 font-medium">Stripe ID</th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-white/5">
               {usersData?.data?.map((client: any) => (
                 <tr
                   key={client._id}
-                  className="hover:bg-white/5 transition-colors"
+                  className="hover:bg-white/5 transition-colors align-top"
                 >
                   <td className="px-6 py-4 text-white font-medium">
                     {client.firstname} {client.surname}
                   </td>
 
-                  <td className="px-6 py-4 text-slate-400">
-                    {client.email}
-                  </td>
+                  <td className="px-6 py-4 text-slate-400">{client.email}</td>
 
                   <td className="px-6 py-4 text-slate-500 capitalize">
                     {client.role}
                   </td>
 
-                  <td className="px-6 py-4 text-emerald-400 capitalize">
+                  <td className="px-6 py-4 min-w-[280px]">
                     {getPlans(client.entitlements)}
                   </td>
 
-                  <td className="px-6 py-4 text-blue-400">
+                  <td className="px-6 py-4 min-w-[280px]">
                     {getAddons(client.addonEntitlements)}
                   </td>
 
                   <td className="px-6 py-4 text-slate-500 text-xs">
-                    {client.subscription?.stripeCustomerId || '-'}
+                    {client.subscription?.stripeCustomerId || "-"}
                   </td>
                 </tr>
               ))}
@@ -266,16 +394,14 @@ export default function SuperAdmin() {
       )}
 
       {/* PLANS TAB */}
-      {activeTab === 'plans' && (
+      {activeTab === "plans" && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="space-y-6"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">
-              Manage Plans
-            </h2>
+            <h2 className="text-xl font-semibold text-white">Manage Plans</h2>
 
             <div className="flex gap-3">
               <button
@@ -291,7 +417,7 @@ export default function SuperAdmin() {
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-[#050505] font-medium rounded-lg transition-colors text-sm disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
@@ -307,7 +433,7 @@ export default function SuperAdmin() {
                     type="text"
                     value={plan.name}
                     onChange={(e) =>
-                      updatePlan(plan.id, 'name', e.target.value)
+                      updatePlan(plan.id, "name", e.target.value)
                     }
                     className="bg-transparent text-xl font-bold text-white border-b border-white/20 focus:border-emerald-500 outline-none pb-1"
                   />
@@ -327,18 +453,12 @@ export default function SuperAdmin() {
                     type="number"
                     value={plan.price}
                     onChange={(e) =>
-                      updatePlan(
-                        plan.id,
-                        'price',
-                        Number(e.target.value)
-                      )
+                      updatePlan(plan.id, "price", Number(e.target.value))
                     }
                     className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white w-24 outline-none focus:border-emerald-500"
                   />
 
-                  <span className="text-slate-500 text-sm">
-                    / month
-                  </span>
+                  <span className="text-slate-500 text-sm">/ month</span>
                 </div>
 
                 <div className="space-y-4">
@@ -349,13 +469,9 @@ export default function SuperAdmin() {
 
                     <input
                       type="text"
-                      value={plan.webhookUrl || ''}
+                      value={plan.webhookUrl || ""}
                       onChange={(e) =>
-                        updatePlan(
-                          plan.id,
-                          'webhookUrl',
-                          e.target.value
-                        )
+                        updatePlan(plan.id, "webhookUrl", e.target.value)
                       }
                       placeholder="https://..."
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500"
@@ -369,13 +485,9 @@ export default function SuperAdmin() {
 
                     <input
                       type="password"
-                      value={plan.secretKey || ''}
+                      value={plan.secretKey || ""}
                       onChange={(e) =>
-                        updatePlan(
-                          plan.id,
-                          'secretKey',
-                          e.target.value
-                        )
+                        updatePlan(plan.id, "secretKey", e.target.value)
                       }
                       placeholder="sk_test_..."
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500"
@@ -391,9 +503,9 @@ export default function SuperAdmin() {
 
                     <button
                       onClick={() =>
-                        updatePlan(plan.id, 'features', [
+                        updatePlan(plan.id, "features", [
                           ...plan.features,
-                          'New Feature',
+                          "New Feature",
                         ])
                       }
                       className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
@@ -404,37 +516,25 @@ export default function SuperAdmin() {
 
                   <div className="space-y-2">
                     {plan.features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2"
-                      >
+                      <div key={index} className="flex items-center gap-2">
                         <input
                           type="text"
                           value={feature}
                           onChange={(e) => {
                             const newFeatures = [...plan.features];
                             newFeatures[index] = e.target.value;
-                            updatePlan(
-                              plan.id,
-                              'features',
-                              newFeatures
-                            );
+                            updatePlan(plan.id, "features", newFeatures);
                           }}
                           className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:border-emerald-500"
                         />
 
                         <button
                           onClick={() => {
-                            const newFeatures =
-                              plan.features.filter(
-                                (_, i) => i !== index
-                              );
-
-                            updatePlan(
-                              plan.id,
-                              'features',
-                              newFeatures
+                            const newFeatures = plan.features.filter(
+                              (_, i) => i !== index,
                             );
+
+                            updatePlan(plan.id, "features", newFeatures);
                           }}
                           className="text-rose-400 hover:text-rose-300 p-2 bg-rose-500/10 rounded-lg shrink-0"
                         >
@@ -463,8 +563,8 @@ export default function SuperAdmin() {
                         addons.map((a) =>
                           a.id === addon.id
                             ? { ...a, name: e.target.value }
-                            : a
-                        )
+                            : a,
+                        ),
                       )
                     }
                     className="bg-transparent text-lg font-bold text-white border-b border-white/20 focus:border-emerald-500 outline-none pb-1 w-full mr-4"
@@ -472,11 +572,7 @@ export default function SuperAdmin() {
 
                   <button
                     onClick={() =>
-                      setAddons(
-                        addons.filter(
-                          (a) => a.id !== addon.id
-                        )
-                      )
+                      setAddons(addons.filter((a) => a.id !== addon.id))
                     }
                     className="text-rose-400 hover:text-rose-300 p-2 bg-rose-500/10 rounded-lg shrink-0"
                   >
@@ -498,16 +594,14 @@ export default function SuperAdmin() {
                                 ...a,
                                 price: Number(e.target.value),
                               }
-                            : a
-                        )
+                            : a,
+                        ),
                       )
                     }
                     className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white w-24 outline-none focus:border-emerald-500"
                   />
 
-                  <span className="text-slate-500 text-sm">
-                    / month
-                  </span>
+                  <span className="text-slate-500 text-sm">/ month</span>
                 </div>
 
                 <div className="space-y-4">
@@ -526,8 +620,8 @@ export default function SuperAdmin() {
                                   ...a,
                                   desc: e.target.value,
                                 }
-                              : a
-                          )
+                              : a,
+                          ),
                         )
                       }
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none focus:border-emerald-500 h-20 resize-none"
@@ -541,7 +635,7 @@ export default function SuperAdmin() {
       )}
 
       {/* SITES TAB */}
-      {activeTab === 'sites' && (
+      {activeTab === "sites" && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -563,6 +657,61 @@ export default function SuperAdmin() {
             ))}
           </div>
         </motion.div>
+      )}
+
+      {cancelModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0a0a0a] p-6 shadow-2xl"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+
+              <div>
+                <h3 className="text-white text-lg font-semibold">
+                  Cancel Subscription
+                </h3>
+                <p className="text-sm text-slate-400">
+                  This will cancel at the end of the billing period.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
+              <p className="text-sm text-slate-300">
+                Are you sure you want to cancel this subscription?
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() =>
+                  setCancelModal({
+                    open: false,
+                    subscriptionId: null,
+                  })
+                }
+                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors"
+              >
+                Keep Active
+              </button>
+
+              <button
+                onClick={handleCancel}
+                disabled={!!cancelLoading}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-400 disabled:opacity-50 transition-colors"
+              >
+                {cancelLoading ? "Cancelling..." : "Yes, Cancel"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

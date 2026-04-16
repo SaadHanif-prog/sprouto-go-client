@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Plus,
   Sparkles,
+  Mail
 } from "lucide-react";
 import { Plan, Addon, mockPlans, mockAddons } from "../types";
 import CheckoutForm from "./Checkoutform";
@@ -18,7 +19,8 @@ const iconMap: Record<string, any> = {
   Globe,
   Shield,
   Zap,
-  Sparkles
+  Sparkles,
+  Mail
 };
 
 export default function Plans({ siteId }: { siteId: string }) {

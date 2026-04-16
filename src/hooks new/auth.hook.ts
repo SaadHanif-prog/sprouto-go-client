@@ -59,7 +59,7 @@ export const useSignup = () => {
 
 export const useLogin = () => {
   const dispatch = useDispatch();
-  const queryClient = useQueryClient(); // ✅ use the real shared instance
+  const queryClient = useQueryClient(); 
 
   return useMutation({
     mutationFn: (loginPayload: CreateLogin) => login(loginPayload),
@@ -85,7 +85,6 @@ export const useLogin = () => {
         })
       );
 
-      // ✅ invalidate on the real client so verifyMe refetches
       queryClient.invalidateQueries({ queryKey: ["verifyMe"] });
       queryClient.invalidateQueries({ queryKey: ["sites"] });
 
