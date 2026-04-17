@@ -6,6 +6,7 @@ import ENDPOINTS from "@/src/api/endpoints";
 export interface ChatMessagePayload {
   message: string;
   sessionId: string;
+  siteId: string;
 }
 
 export interface ChatMessageResponse {

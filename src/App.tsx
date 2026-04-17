@@ -375,7 +375,7 @@ export default function App() {
             </AnimatePresence>
           </div>
 
-          {!isChatOpen && (
+          {activeTab !== "sproutoai" && !isChatOpen && (
             <button
               onClick={() => setIsChatOpen(true)}
               className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center"
@@ -385,7 +385,7 @@ export default function App() {
           )}
 
           <AnimatePresence>
-            {isChatOpen && <AIChat onClose={() => setIsChatOpen(false)} />}
+            {isChatOpen && <AIChat onClose={() => setIsChatOpen(false)} site={selectedSite} />}
           </AnimatePresence>
         </main>
       </div>

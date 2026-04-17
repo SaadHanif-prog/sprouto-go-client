@@ -14,7 +14,7 @@ import {
  *
  * Usage:
  *   const { mutateAsync, isPending } = useSendChatMessage();
- *   const response = await mutateAsync({ message: "Hello", sessionId: "user-123" });
+ *   const response = await mutateAsync({ message: "Hello", sessionId: "user-123", siteId: "abc" });
  */
 export const useSendChatMessage = () => {
   return useMutation<ChatMessageResponse, AxiosError<any>, ChatMessagePayload>({

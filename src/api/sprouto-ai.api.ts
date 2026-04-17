@@ -1,11 +1,10 @@
 import { apiClient } from "@/src/api/apiClient";
 import ENDPOINTS from "@/src/api/endpoints";
 
-/* ================= TYPES ================= */
-
 export interface SproutoAIChatPayload {
   message: string;
   sessionId: string;
+  siteId: string; // ← new: pass the site's DB id
 }
 
 export interface SproutoAIChatResponse {
@@ -16,21 +15,6 @@ export interface SproutoAIChatResponse {
   };
 }
 
-export interface SproutoAIAnalysePayload {
-  siteUrl: string;
-  siteName: string;
-  question: string;
-  sessionId: string;
-}
-
-/* ================= API CALLS ================= */
-
-/**
- * Send a message to the SproutoAI full-page assistant.
- * Backed by the same /api/ai/chat endpoint but with a
- * site-scoped sessionId so it stays isolated from the
- * global AIChat widget sessions.
- */
 export const sendSproutoAIMessage = async (
   payload: SproutoAIChatPayload
 ): Promise<SproutoAIChatResponse> => {
@@ -41,11 +25,6 @@ export const sendSproutoAIMessage = async (
   return data;
 };
 
-/**
- * Clear / reset the SproutoAI session for a given site.
- */
-export const clearSproutoAISession = async (
-  sessionId: string
-): Promise<void> => {
+export const clearSproutoAISession = async (sessionId: string): Promise<void> => {
   await apiClient.delete(`${ENDPOINTS.sproutoai}/chat/${sessionId}`);
 };
