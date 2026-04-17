@@ -50,7 +50,6 @@ export interface GetRequestsResponse {
 }
 
 export interface CreateRequestPayload {
-  siteId:      string;
   title:       string;
   description: string;
   priority:    RequestPriority;
@@ -94,7 +93,6 @@ export const createRequest = async (
   file?: File
 ): Promise<CreateRequestResponse> => {
   const formData = new FormData();
-  formData.append("siteId",      payload.siteId);
   formData.append("title",       payload.title);
   formData.append("description", payload.description);
   formData.append("priority",    payload.priority);

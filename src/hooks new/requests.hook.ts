@@ -30,7 +30,6 @@ export const useCreateRequestWithUpload = () => {
     }: {
       file?: File;
       payload: {
-        siteId: string;
         title: string;
         description: string;
         priority: string;
@@ -40,7 +39,7 @@ export const useCreateRequestWithUpload = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       queryClient.invalidateQueries({
-        queryKey: ["requests", variables.payload.siteId],
+        queryKey: ["requests"],
       });
       toast.success("Request created successfully");
     },

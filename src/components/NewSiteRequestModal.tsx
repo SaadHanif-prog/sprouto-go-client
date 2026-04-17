@@ -27,7 +27,6 @@ export default function NewSiteRequestModal({
     await createRequestMutation.mutateAsync({
       file: undefined,
       payload: {
-        siteId: selectedSiteId,
         title,
         description: description || "",
         priority: "medium",
