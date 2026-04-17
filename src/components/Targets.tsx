@@ -24,7 +24,7 @@ interface AddTargetForm {
   month: string;
 }
 
-const UNIT_SUGGESTIONS = ['visitors', '%', 'leads', 'subs', 'sessions', 'conversions', 'pages'];
+const UNIT_SUGGESTIONS = ['visitors', 'conversions'];
 
 const MONTH_OPTIONS = (() => {
   const months = [];

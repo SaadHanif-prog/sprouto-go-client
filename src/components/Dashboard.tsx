@@ -495,7 +495,7 @@ export default function Dashboard({ site }: { site: Site }) {
                     {processedMarkers.map(
                       ({ name, coordinates, markerOffset, clicks }) => (
                         <Marker key={name} coordinates={coordinates}>
-                          <circle r={4} fill="#10b981" />
+                          <circle r={3} fill="#10b981" />
                           <circle
                             r={12}
                             fill="#10b981"
@@ -504,12 +504,13 @@ export default function Dashboard({ site }: { site: Site }) {
                           />
                           <text
                             textAnchor="middle"
-                            y={markerOffset}
+                            y={-20 / zoom}
                             style={{
                               fontFamily: "Inter",
                               fill: "#94a3b8",
-                              fontSize: "10px",
+                              fontSize: `${Math.max(4, 10 / zoom)}px`,
                               fontWeight: 600,
+                              pointerEvents: "none",
                             }}
                           >
                             {name} ({clicks})

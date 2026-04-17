@@ -45,8 +45,7 @@ import Invoices from "./components/Invoices";
 import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useGetSites } from "./hooks new/sites.hook";
-import ResetPassword from "./components/ResetPassword";
-import { useLocation } from "react-router-dom";
+
 
 export type Tab =
   | "dashboard"
@@ -60,13 +59,6 @@ export type Tab =
   | "sites"
   | "invoices";
 
-
-const defaultTabForRole = (role?: string): Tab => {
-  if (role === "developer") return "requests";
-  if (role === "superadmin") return "superadmin";
-  return "dashboard";
-};
-
 const allowedTabsPerRole: Record<string, Tab[]> = {
   superadmin: [
     "superadmin",
@@ -77,7 +69,8 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "plans",
     "sites",
     "profile",
-    "invoices"
+    "invoices",
+    "sproutoai"
   ],
   developer: ["requests", "profile"],
   admin: [
@@ -88,7 +81,8 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "plans",
     "sites",
     "profile",
-    "invoices"
+    "invoices",
+    "sproutoai"
   ],
   client: [
     "dashboard",
@@ -98,7 +92,8 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "plans",
     "sites",
     "profile",
-    "invoices"
+    "invoices",
+    "sproutoai"
   ],
 };
 

@@ -250,6 +250,7 @@ export default function PlanSelectionModal({
                 clientSecret={clientSecret}
                 onClose={() => {
                   setClientSecret(null);
+                  queryClient.invalidateQueries({ queryKey: ["verifyMe"] });
                   setShowHasSiteModal(true);
                 }}
               />

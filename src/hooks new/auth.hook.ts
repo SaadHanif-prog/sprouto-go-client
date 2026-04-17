@@ -43,11 +43,14 @@ import {
 } from "@/src/global-states/slices/authSlice";
 
 export const useSignup = () => {
+    const queryClient = useQueryClient(); 
+
 
   return useMutation({
     mutationFn: (signupPayload: CreateSignup) => signup(signupPayload),
 
     onSuccess: (data: SignupApiResponse) => {
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
       toast.success(data.message || "Signup Successful.");
     },
 

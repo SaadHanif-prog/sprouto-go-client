@@ -17,7 +17,6 @@ export default function NewSiteRequestModal({
   onSubmitted,
 }: NewSiteRequestModalProps) {
   const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
 
   const createRequestMutation = useCreateRequestWithUpload();
@@ -30,7 +29,7 @@ export default function NewSiteRequestModal({
       payload: {
         siteId: selectedSiteId,
         title,
-        description: `${description}${url ? `\n\nWebsite URL: ${url}` : ""}`,
+        description: description || "",
         priority: "medium",
       },
     });
@@ -98,7 +97,7 @@ export default function NewSiteRequestModal({
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
                   />
                 </div>
-
+{/* 
                 <div>
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
                     Website URL <span className="text-slate-500 font-normal">(if known)</span>
@@ -110,7 +109,7 @@ export default function NewSiteRequestModal({
                     placeholder="https://acmecorp.com"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
                   />
-                </div>
+                </div> */}
 
                 <div>
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
