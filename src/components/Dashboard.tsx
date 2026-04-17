@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  ArrowDownRight,
 } from "lucide-react";
 import {
   ComposableMap,
@@ -279,6 +280,8 @@ export default function Dashboard({ site }: { site: Site }) {
       {/* ── Stats Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
         {stats.map((stat, index) => {
+          const isNegative = stat.change.startsWith("-");
+
           const Icon = stat.icon;
           return (
             <motion.div
@@ -295,10 +298,22 @@ export default function Dashboard({ site }: { site: Site }) {
                 >
                   <Icon className="w-6 h-6" />
                 </div>
+
                 <div
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-medium ${aiStats ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" : "text-slate-500 bg-white/5 border border-white/10"}`}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-medium ${
+                    aiStats
+                      ? isNegative
+                        ? "text-red-400 bg-red-500/10 border border-red-500/20"
+                        : "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                      : "text-slate-500 bg-white/5 border border-white/10"
+                  }`}
                 >
-                  <ArrowUpRight className="w-4 h-4" />
+                  {isNegative ? (
+                    <ArrowDownRight className="w-4 h-4" />
+                  ) : (
+                    <ArrowUpRight className="w-4 h-4" />
+                  )}
+
                   {stat.change}
                 </div>
               </div>
