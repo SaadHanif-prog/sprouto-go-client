@@ -250,7 +250,6 @@ export default function PlanSelectionModal({
                 clientSecret={clientSecret}
                 onClose={() => {
                   setClientSecret(null);
-                  queryClient.invalidateQueries({ queryKey: ["verifyMe"] });
                   setShowHasSiteModal(true);
                 }}
               />
@@ -267,11 +266,19 @@ export default function PlanSelectionModal({
 
           <NewSiteRequestModal
             isOpen={showNewSiteModal}
-            onClose={() => {
+            onClose={async () => {
+              await queryClient.invalidateQueries({
+                queryKey: ["verifyMe"],
+              });
+
               setShowNewSiteModal(false);
               onClose();
             }}
-            onSubmitted={() => {
+            onSubmitted={async () => {
+              await queryClient.invalidateQueries({
+                queryKey: ["verifyMe"],
+              });
+
               setShowNewSiteModal(false);
               onClose();
               onGoToRequests();

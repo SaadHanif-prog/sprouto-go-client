@@ -13,7 +13,7 @@ import {
   Plus,
   Menu,
   Sparkles,
-  ReceiptText
+  ReceiptText,
 } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -46,7 +46,6 @@ import { useLogout } from "./hooks new/auth.hook";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useGetSites } from "./hooks new/sites.hook";
 
-
 export type Tab =
   | "dashboard"
   | "requests"
@@ -70,7 +69,7 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "sites",
     "profile",
     "invoices",
-    "sproutoai"
+    "sproutoai",
   ],
   developer: ["requests", "profile"],
   admin: [
@@ -82,7 +81,7 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "sites",
     "profile",
     "invoices",
-    "sproutoai"
+    "sproutoai",
   ],
   client: [
     "dashboard",
@@ -93,12 +92,11 @@ const allowedTabsPerRole: Record<string, Tab[]> = {
     "sites",
     "profile",
     "invoices",
-    "sproutoai"
+    "sproutoai",
   ],
 };
 
 export default function App() {
-
   const { user } = useSelector((state: RootState) => state.auth);
 
   const userRole = user?.role;
@@ -140,7 +138,6 @@ export default function App() {
           { id: "sproutoai", label: "SproutoAI", icon: Sparkles },
           { id: "plans", label: "Plans & Upgrades", icon: CreditCard },
           { id: "invoices", label: "Invoices", icon: ReceiptText },
-
         ]
       : userRole === "developer"
         ? [{ id: "requests", label: "Assigned Requests", icon: Settings }]
@@ -155,6 +152,7 @@ export default function App() {
             { id: "auditor", label: "GEO/SEO Auditor", icon: Search },
 
             ...(userRole === "admin" ||
+            selectedSite?.plan?.trim().toLowerCase() === "pro" ||
             (selectedSite?.plan &&
               selectedSite.plan.trim().toLowerCase() !== "starter") ||
             user?.addonentitlementid?.includes("a4")
@@ -319,7 +317,9 @@ export default function App() {
               </button>
 
               <h1 className="text-2xl font-semibold text-white tracking-tight">
-                {user?.firstname + " " + user?.surname || user?.email || "SproutoGO"}
+                {user?.firstname + " " + user?.surname ||
+                  user?.email ||
+                  "SproutoGO"}
               </h1>
             </div>
 
@@ -355,7 +355,9 @@ export default function App() {
                 {activeTab === "auditor" && isAllowed("auditor") && (
                   <SEOAuditor site={selectedSite} />
                 )}
-                {activeTab === "sproutoai" && isAllowed("sproutoai") && <SproutoAI site={selectedSite} />}
+                {activeTab === "sproutoai" && isAllowed("sproutoai") && (
+                  <SproutoAI site={selectedSite} />
+                )}
 
                 {activeTab === "plans" && isAllowed("plans") && (
                   <Plans siteId={selectedSiteId} />
@@ -367,7 +369,7 @@ export default function App() {
                 {activeTab === "superadmin" && isAllowed("superadmin") && (
                   <SuperAdmin />
                 )}
-                 {activeTab === "invoices" && isAllowed("invoices") && (
+                {activeTab === "invoices" && isAllowed("invoices") && (
                   <Invoices />
                 )}
               </motion.div>
