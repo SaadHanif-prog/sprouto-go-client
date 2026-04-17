@@ -22,7 +22,7 @@ function getAgeStyle(createdAt: string | Date): {
   const ageMs   = Date.now() - created;
   const ageDays = ageMs / (1000 * 60 * 60 * 24);
 
-  if (ageDays < 2) {
+  if (ageDays < 7) {
     return {
       border: 'border-emerald-500/40',
       glow:   'shadow-[0_0_12px_rgba(16,185,129,0.15)]',
@@ -30,7 +30,7 @@ function getAgeStyle(createdAt: string | Date): {
       label:  'New',
     };
   }
-  if (ageDays < 4) {
+  if (ageDays < 14) {
     return {
       border: 'border-amber-500/40',
       glow:   'shadow-[0_0_12px_rgba(245,158,11,0.15)]',
