@@ -32,6 +32,7 @@ export interface Attachment {
 export interface Request {
   _id: string;
   siteId: SiteInfo | string;
+  requestForNewSite: boolean;
   userId: UserInfo | string;
   assignedTo?: UserInfo | null;
   title: string;
@@ -51,6 +52,7 @@ export interface GetRequestsResponse {
 
 export interface CreateRequestPayload {
   siteId?: string;
+  requestForNewSite?: string;
   title: string;
   description: string;
   priority: RequestPriority;
@@ -95,6 +97,10 @@ export const createRequest = async (
 
   if (payload.siteId) {
     formData.append("siteId", payload.siteId);
+  }
+
+   if (payload.requestForNewSite) {
+    formData.append("requestForNewSite", payload.requestForNewSite);
   }
 
   formData.append("title", payload.title);

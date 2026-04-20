@@ -27,6 +27,7 @@ export default function PlanSelectionModal({
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );
+
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showHasSiteModal, setShowHasSiteModal] = useState(false);

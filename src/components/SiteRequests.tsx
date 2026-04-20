@@ -12,17 +12,37 @@ import { useGetAllUsers } from "@/src/hooks new/auth.hook";
 import { RootState } from '../global-states/store';
 
 
-function getAgeStyle(createdAt: string | Date): {
+function getBusinessDays(createdAt: string | Date): number {
+  const start = new Date(createdAt);
+  const now = new Date();
+  let count = 0;
+  const current = new Date(start);
+
+  while (current < now) {
+    current.setDate(current.getDate() + 1);
+    const day = current.getDay();
+    if (day !== 0 && day !== 6) { // 0 = Sunday, 6 = Saturday
+      count++;
+    }
+  }
+
+  return count;
+}
+
+function getAgeStyle(createdAt: string | Date, requestForNewSite?: boolean): {
   border: string;
   glow: string;
   dot: string;
   label: string;
 } {
-  const created = new Date(createdAt).getTime();
-  const ageMs   = Date.now() - created;
-  const ageDays = ageMs / (1000 * 60 * 60 * 24);
+  const businessDays = getBusinessDays(createdAt);
 
-  if (ageDays < 7) {
+  // requestForNewSite → 7 business days total: New < 3, Aging 3–6, Overdue 7+
+  // regular request   → 4 business days total: New < 2, Aging 2–3, Overdue 4+
+  const newThreshold    = requestForNewSite ? 5 : 2;
+  const agingThreshold  = requestForNewSite ? 7 : 4;
+
+  if (businessDays < newThreshold) {
     return {
       border: 'border-emerald-500/40',
       glow:   'shadow-[0_0_12px_rgba(16,185,129,0.15)]',
@@ -30,7 +50,7 @@ function getAgeStyle(createdAt: string | Date): {
       label:  'New',
     };
   }
-  if (ageDays < 14) {
+  if (businessDays < agingThreshold) {
     return {
       border: 'border-amber-500/40',
       glow:   'shadow-[0_0_12px_rgba(245,158,11,0.15)]',
@@ -45,7 +65,6 @@ function getAgeStyle(createdAt: string | Date): {
     label:  'Overdue',
   };
 }
-
 export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: string, sitePlan?: string }) {
 
   const selectedSiteId = useSelector(selectSelectedSiteId);
@@ -346,9 +365,9 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
 
             // ── Age-based card styling ──────────────────────────────────────
             // Completed requests stay neutral — no urgency colouring needed.
-            const ageStyle = request.status === 'completed'
-              ? { border: 'border-white/10', glow: '', dot: 'bg-slate-500', label: '' }
-              : getAgeStyle(request.createdAt);
+          const ageStyle = request.status === 'completed'
+  ? { border: 'border-white/10', glow: '', dot: 'bg-slate-500', label: '' }
+  : getAgeStyle(request.createdAt, request.requestForNewSite); 
 
             return (
               <motion.div
@@ -412,10 +431,10 @@ export default function SiteRequests({ role, sitePlan = 'Starter' }: { role: str
 
                     {/* Counts row */}
                     <div className="flex items-center gap-4 text-xs text-slate-500">
-                      <span className="flex items-center gap-1.5">
+                      {/* <span className="flex items-center gap-1.5">
                         <MessageSquare className="w-4 h-4" />
                         {request.messages.length} messages
-                      </span>
+                      </span> */}
                       {request.attachments.length > 0 && (
                         <span className="flex items-center gap-1.5">
                           <Paperclip className="w-4 h-4" />

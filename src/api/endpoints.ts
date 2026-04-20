@@ -8,7 +8,6 @@ type EndpointsType = {
   ai: "/ai"
   sproutoai: "/sproutoai"
   statsnew: "/google",
-  upload: "/upload-attachment"
   invoices: "/invoices"
 };
 
@@ -22,7 +21,6 @@ const ENDPOINTS: EndpointsType = {
   ai: "/ai",
   sproutoai: "/sproutoai",
   statsnew: "/google",
-  upload: "/upload-attachment",
   invoices: "/invoices"
 
 };

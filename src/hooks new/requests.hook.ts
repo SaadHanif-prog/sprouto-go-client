@@ -32,6 +32,7 @@ export const useCreateRequestWithUpload = () => {
       file?: File;
       payload: {
         siteId?: string;
+        requestForNewSite?: string;
         title: string;
         description: string;
         priority: string;
