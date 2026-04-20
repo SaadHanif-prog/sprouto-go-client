@@ -77,11 +77,11 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
   const senderRole = (msg: any): 'developer' | 'client' =>
     msg.senderId?.role === 'developer' ? 'developer' : 'client';
 
- const renderMessageWithLinks = (text: string) => {
-  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
+const renderMessageWithLinks = (text: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
 
   return text.split(urlRegex).map((part, index) => {
-    if (urlRegex.test(part)) {
+    if (/^(https?:\/\/|www\.)/.test(part)) {
       const href = part.startsWith("www.")
         ? `https://${part}`
         : part;
@@ -92,7 +92,7 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-emerald-400 underline hover:text-emerald-300 break-all"
+          className="text-emerald-800 underline hover:text-emerald-900 break-all"
         >
           {part}
         </a>
