@@ -77,6 +77,32 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
   const senderRole = (msg: any): 'developer' | 'client' =>
     msg.senderId?.role === 'developer' ? 'developer' : 'client';
 
+ const renderMessageWithLinks = (text: string) => {
+  const urlRegex = /((https?:\/\/|www\.)[^\s]+)/g;
+
+  return text.split(urlRegex).map((part, index) => {
+    if (urlRegex.test(part)) {
+      const href = part.startsWith("www.")
+        ? `https://${part}`
+        : part;
+
+      return (
+        <a
+          key={index}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-emerald-400 underline hover:text-emerald-300 break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+
+    return part;
+  });
+};
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -231,7 +257,7 @@ export default function RequestDetail({ request, role, onClose, onUpdate }: Requ
                       </span>
                     </div>
                     <div className={`max-w-[85%] lg:max-w-[80%] p-3.5 rounded-2xl text-sm leading-relaxed break-words ${mine ? 'bg-emerald-500 text-[#050505] rounded-tr-sm font-medium shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-white/5 border border-white/10 text-slate-300 rounded-tl-sm shadow-sm'}`}>
-                      {msg.text}
+                     {renderMessageWithLinks(msg.text)}
                     </div>
                   </div>
 
