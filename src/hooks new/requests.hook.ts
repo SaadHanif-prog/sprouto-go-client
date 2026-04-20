@@ -6,7 +6,8 @@ import {
   createRequest,
   getRequests,
   assignRequest,
-  completeRequest
+  completeRequest,
+  uploadRequestAttachment
 } from "../api/request.api";
 
 /* ================= GET REQUESTS ================= */
@@ -98,6 +99,24 @@ export const useCompleteRequest = () => {
       toast.error(
         error.response?.data?.message || "Failed to complete request"
       );
+    },
+  });
+};
+
+export const useUploadRequestAttachment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ requestId, files }: { requestId: string; files: File[] }) =>
+      uploadRequestAttachment(requestId, files),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+      toast.success("Files uploaded successfully");
+    },
+
+    onError: (error: AxiosError<any>) => {
+      toast.error(error.response?.data?.message || "Upload failed");
     },
   });
 };
