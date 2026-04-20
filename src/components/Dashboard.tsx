@@ -507,32 +507,34 @@ export default function Dashboard({ site }: { site: Site }) {
                       }
                     </Geographies>
 
-                    {processedMarkers.map(
-                      ({ name, coordinates, markerOffset, clicks }) => (
-                        <Marker key={name} coordinates={coordinates}>
-                          <circle r={3} fill="#10b981" />
-                          <circle
-                            r={12}
-                            fill="#10b981"
-                            opacity={0.2}
-                            className="animate-ping"
-                          />
+                    {processedMarkers.map(({ name, coordinates, clicks }) => (
+                      <Marker key={name} coordinates={coordinates}>
+                        <circle r={3} fill="#10b981" />
+                        <circle
+                          r={12}
+                          fill="#10b981"
+                          opacity={0.2}
+                          className="animate-ping"
+                        />
+
+                        {zoom >= 1.5 && (
                           <text
                             textAnchor="middle"
-                            y={-20 / zoom}
+                            y={-8}
                             style={{
                               fontFamily: "Inter",
                               fill: "#94a3b8",
-                              fontSize: `${Math.max(4, 10 / zoom)}px`,
+                              fontSize: "4px",
                               fontWeight: 600,
                               pointerEvents: "none",
+                              opacity: Math.min(1, (zoom - 1.5) / 0.5),
                             }}
                           >
                             {name} ({clicks})
                           </text>
-                        </Marker>
-                      ),
-                    )}
+                        )}
+                      </Marker>
+                    ))}
                   </ZoomableGroup>
                 </ComposableMap>
               </div>
